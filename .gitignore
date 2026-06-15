@@ -1,0 +1,12 @@
+# Database Configuration
+config/db.php
+
+# Environment variables
+.env
+.env.local
+
+# IDEs & System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
