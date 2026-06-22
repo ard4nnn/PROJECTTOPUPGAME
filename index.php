@@ -80,14 +80,6 @@ $flash_sale_items = [
         'slug'          => 'free-fire',
     ],
     [
-        'icon'          => '⚠️',
-        'nama'          => 'Top Up Free Fire | Membership FF Termurah Gratis Biaya Admin',
-        'harga_normal'  => 0,
-        'harga_promo'   => 0,
-        'kategori'      => '⚠ SYARAT & KETENTUAN [LIMITED] [PROMO] dan [TEBUS MURAH]',
-        'slug'          => 'free-fire',
-    ],
-    [
         'icon'          => '🏆',
         'nama'          => 'Top Up Mobile Legends | Diamond ML Termurah',
         'harga_normal'  => 25000,
@@ -636,7 +628,7 @@ $flash_sale_items = [
         text-decoration: none;
         color: inherit;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
     }
 
     .flash-sale-card:hover {
@@ -671,23 +663,62 @@ $flash_sale_items = [
         object-fit: cover;
     }
 
+    /* Folded Ribbon Container */
+    .flash-sale-ribbon-wrapper {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 85px;
+        height: 85px;
+        overflow: hidden;
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    /* Ribbon folds (triangles wrapping around the card edge) */
+    .flash-sale-ribbon-wrapper::before,
+    .flash-sale-ribbon-wrapper::after {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        width: 0;
+        height: 0;
+        border: 3px solid #b8860b; /* Dark gold color for the fold shadow */
+    }
+
+    /* Top fold */
+    .flash-sale-ribbon-wrapper::before {
+        top: 0;
+        left: 0;
+        border-top-color: transparent;
+        border-left-color: transparent;
+    }
+
+    /* Right fold */
+    .flash-sale-ribbon-wrapper::after {
+        bottom: 0;
+        right: 0;
+        border-bottom-color: transparent;
+        border-right-color: transparent;
+    }
+
+    /* The actual diagonal ribbon */
     .flash-sale-badge-save {
         position: absolute;
-        top: 18px;
-        right: -38px;
-        background: linear-gradient(135deg, #f6465d 0%, #d63050 100%);
-        color: #ffffff;
-        font-size: 9px;
-        font-weight: 800;
-        padding: 5px 45px;
-        transform: rotate(45deg);
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        z-index: 5;
-        box-shadow: 0 2px 6px rgba(246, 70, 93, 0.4);
+        display: block;
+        width: 125px;
+        padding: 5px 0;
+        background: linear-gradient(135deg, #fcd535 0%, #f3ba2f 100%);
+        color: #181a20;
+        font-size: 8.5px;
+        font-weight: 900;
         text-align: center;
-        white-space: nowrap;
-        line-height: 1.2;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transform: rotate(45deg);
+        right: -31px;
+        top: 17px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     }
 
     .flash-sale-card-body {
@@ -954,9 +985,11 @@ $flash_sale_items = [
             ?>
                 <a href="user/topup/game.php?slug=<?php echo htmlspecialchars($item['slug']); ?>" class="flash-sale-card">
                     <?php if ($has_savings): ?>
-                        <span class="flash-sale-badge-save">
-                            <?php echo $current_lang === 'id' ? 'HEMAT Rp ' . number_format($savings, 0, ',', '.') : 'SAVE Rp ' . number_format($savings, 0, ',', '.'); ?>
-                        </span>
+                        <div class="flash-sale-ribbon-wrapper">
+                            <span class="flash-sale-badge-save">
+                                <?php echo $current_lang === 'id' ? 'HEMAT Rp ' . number_format($savings, 0, ',', '.') : 'SAVE Rp ' . number_format($savings, 0, ',', '.'); ?>
+                            </span>
+                        </div>
                     <?php endif; ?>
                     <div class="flash-sale-card-top">
                         <div class="flash-sale-card-icon-wrapper">
