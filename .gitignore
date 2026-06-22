@@ -1,12 +1,24 @@
-# Database Configuration
+# Database Configuration (private credentials)
 config/db.php
 
 # Environment variables
 .env
 .env.local
 
+# Asset Images (private/generated)
+assets/images/*.png
+assets/images/*.jpg
+assets/images/*.jpeg
+assets/images/*.gif
+assets/images/*.svg
+assets/images/*.webp
+assets/images/*.ico
+
 # IDEs & System Files
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Gemini AI
+.gemini/
