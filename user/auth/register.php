@@ -3,7 +3,7 @@ require_once '../../config/db.php';
 require_once '../../includes/header.php';
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: " . $base_url);
+    echo "<script>window.location.href = '" . $base_url . "';</script>";
     exit;
 }
 
