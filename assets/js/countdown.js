@@ -37,60 +37,7 @@ if (timerContainer) {
     const countdownInterval = setInterval(updateCountdown, 1000);
 }
 
-// Flash Sale Horizontal Scrolling
-const fsCarousel = document.getElementById('fs-carousel');
-const fsPrevBtn = document.getElementById('fs-prev');
-const fsNextBtn = document.getElementById('fs-next');
-
-if (fsCarousel) {
-    const scrollStep = 300;
-    let fsAutoScrollInterval;
-
-    if (fsPrevBtn && fsNextBtn) {
-        fsPrevBtn.addEventListener('click', () => {
-            fsCarousel.scrollBy({ left: -scrollStep, behavior: 'smooth' });
-            resetFSAutoScroll();
-        });
-
-        fsNextBtn.addEventListener('click', () => {
-            fsCarousel.scrollBy({ left: scrollStep, behavior: 'smooth' });
-            resetFSAutoScroll();
-        });
-    }
-
-    function startFSAutoScroll() {
-        fsAutoScrollInterval = setInterval(() => {
-            const maxScrollLeft = fsCarousel.scrollWidth - fsCarousel.clientWidth;
-            if (fsCarousel.scrollLeft >= maxScrollLeft - 5) {
-                fsCarousel.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                fsCarousel.scrollBy({ left: scrollStep, behavior: 'smooth' });
-            }
-        }, 4000);
-    }
-
-    function resetFSAutoScroll() {
-        clearInterval(fsAutoScrollInterval);
-        startFSAutoScroll();
-    }
-
-    fsCarousel.addEventListener('mouseenter', () => {
-        clearInterval(fsAutoScrollInterval);
-    });
-
-    fsCarousel.addEventListener('mouseleave', () => {
-        fsAutoScrollInterval = setInterval(() => {
-            const maxScrollLeft = fsCarousel.scrollWidth - fsCarousel.clientWidth;
-            if (fsCarousel.scrollLeft >= maxScrollLeft - 5) {
-                fsCarousel.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                fsCarousel.scrollBy({ left: scrollStep, behavior: 'smooth' });
-            }
-        }, 4000);
-    });
-
-    startFSAutoScroll();
-}
+// Flash Sale scrolling is now fully animated via CSS (style.css marquee). JS code removed to prevent conflicts.
 
 // Copy Promo Voucher
 function copyPromoCode(code) {
