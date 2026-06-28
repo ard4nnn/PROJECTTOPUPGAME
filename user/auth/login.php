@@ -3,7 +3,7 @@ require_once '../../config/db.php';
 require_once '../../includes/header.php';
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: " . $base_url);
+    echo "<script>window.location.href = '" . $base_url . "';</script>";
     exit;
 }
 
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['saldo'] = $user['saldo'];
-                    header("Location: " . $base_url);
+                    echo "<script>window.location.href = '" . $base_url . "';</script>";
                     exit;
                 } else {
                     $error = 'Username atau password salah!';
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = 999;
             $_SESSION['username'] = htmlspecialchars($username);
             $_SESSION['saldo'] = 75000.00;
-            header("Location: " . $base_url);
+            echo "<script>window.location.href = '" . $base_url . "';</script>";
             exit;
         }
     }
