@@ -140,66 +140,118 @@ $flash_sale_items = $flashsale_data['items'];
     </div>
 
     <div class="flash-sale-carousel-wrapper">
-        <!-- Navigation Buttons -->
-        <button class="flash-sale-nav-btn prev" id="fs-prev">&larr;</button>
-        
         <div class="flash-sale-carousel" id="fs-carousel">
-            <?php foreach ($flash_sale_items as $item): 
-                $savings = $item['harga_normal'] - $item['harga_promo'];
-                $has_savings = ($savings > 0 && $item['harga_normal'] > 0);
-                $is_image_icon = (strpos($item['icon'], '/') !== false || strpos($item['icon'], '.') !== false);
-            ?>
-                <a href="user/topup/game.php?slug=<?php echo htmlspecialchars($item['slug']); ?>" class="flash-sale-card">
-                    <?php if ($has_savings): ?>
-                        <div class="flash-sale-ribbon-wrapper">
-                            <span class="flash-sale-badge-save">
-                                <?php echo $current_lang === 'id' ? 'HEMAT Rp ' . number_format($savings, 0, ',', '.') : 'SAVE Rp ' . number_format($savings, 0, ',', '.'); ?>
-                            </span>
-                        </div>
-                    <?php endif; ?>
-                    <div class="flash-sale-card-top">
-                        <div class="flash-sale-card-icon-wrapper">
-                            <?php if ($is_image_icon): ?>
-                                <img src="<?php echo htmlspecialchars($item['icon']); ?>" alt="" class="flash-sale-card-icon-img">
-                            <?php else: ?>
-                                <?php echo htmlspecialchars($item['icon']); ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    
-                    <div class="flash-sale-card-body">
-                        <span class="flash-sale-card-name"><?php echo htmlspecialchars($item['nama']); ?></span>
-                        <span class="flash-sale-card-category"><?php echo htmlspecialchars($item['kategori']); ?></span>
-                    </div>
-                    
-                    <div class="flash-sale-card-footer">
-                        <div class="flash-sale-price-wrapper">
-                            <?php if ($item['harga_normal'] > 0): ?>
-                                <span class="flash-sale-price-old">
-                                    Rp <?php echo number_format($item['harga_normal'], 0, ',', '.'); ?>
+            <div class="flash-sale-track">
+                <?php foreach ($flash_sale_items as $item): 
+                    $savings = $item['harga_normal'] - $item['harga_promo'];
+                    $has_savings = ($savings > 0 && $item['harga_normal'] > 0);
+                    $is_image_icon = (strpos($item['icon'], '/') !== false || strpos($item['icon'], '.') !== false);
+                ?>
+                    <a href="user/topup/game.php?slug=<?php echo htmlspecialchars($item['slug']); ?>" class="flash-sale-card">
+                        <?php if ($has_savings): ?>
+                            <div class="flash-sale-ribbon-wrapper">
+                                <span class="flash-sale-badge-save">
+                                    <?php echo $current_lang === 'id' ? 'HEMAT Rp ' . number_format($savings, 0, ',', '.') : 'SAVE Rp ' . number_format($savings, 0, ',', '.'); ?>
                                 </span>
-                            <?php else: ?>
-                                <span class="flash-sale-price-old" style="visibility: hidden;">Rp 0</span>
-                            <?php endif; ?>
-                            
-                            <span class="flash-sale-price-new">
-                                <?php if ($item['harga_promo'] > 0): ?>
-                                    Rp <?php echo number_format($item['harga_promo'], 0, ',', '.'); ?>
+                            </div>
+                        <?php endif; ?>
+                        <div class="flash-sale-card-top">
+                            <div class="flash-sale-card-icon-wrapper">
+                                <?php if ($is_image_icon): ?>
+                                    <img src="<?php echo htmlspecialchars($item['icon']); ?>" alt="" class="flash-sale-card-icon-img">
                                 <?php else: ?>
-                                    <?php echo $current_lang === 'id' ? 'Lihat Detail' : 'View Details'; ?>
+                                    <?php echo htmlspecialchars($item['icon']); ?>
                                 <?php endif; ?>
-                            </span>
+                            </div>
                         </div>
                         
-                        <div class="flash-sale-card-action">
-                            &rarr;
+                        <div class="flash-sale-card-body">
+                            <span class="flash-sale-card-name"><?php echo htmlspecialchars($item['nama']); ?></span>
+                            <span class="flash-sale-card-category"><?php echo htmlspecialchars($item['kategori']); ?></span>
                         </div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+                        
+                        <div class="flash-sale-card-footer">
+                            <div class="flash-sale-price-wrapper">
+                                <?php if ($item['harga_normal'] > 0): ?>
+                                    <span class="flash-sale-price-old">
+                                        Rp <?php echo number_format($item['harga_normal'], 0, ',', '.'); ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="flash-sale-price-old" style="visibility: hidden;">Rp 0</span>
+                                <?php endif; ?>
+                                
+                                <span class="flash-sale-price-new">
+                                    <?php if ($item['harga_promo'] > 0): ?>
+                                        Rp <?php echo number_format($item['harga_promo'], 0, ',', '.'); ?>
+                                    <?php else: ?>
+                                        <?php echo $current_lang === 'id' ? 'Lihat Detail' : 'View Details'; ?>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            
+                            <div class="flash-sale-card-action">
+                                &rarr;
+                            </div>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <div class="flash-sale-track">
+                <?php foreach ($flash_sale_items as $item): 
+                    $savings = $item['harga_normal'] - $item['harga_promo'];
+                    $has_savings = ($savings > 0 && $item['harga_normal'] > 0);
+                    $is_image_icon = (strpos($item['icon'], '/') !== false || strpos($item['icon'], '.') !== false);
+                ?>
+                    <a href="user/topup/game.php?slug=<?php echo htmlspecialchars($item['slug']); ?>" class="flash-sale-card">
+                        <?php if ($has_savings): ?>
+                            <div class="flash-sale-ribbon-wrapper">
+                                <span class="flash-sale-badge-save">
+                                    <?php echo $current_lang === 'id' ? 'HEMAT Rp ' . number_format($savings, 0, ',', '.') : 'SAVE Rp ' . number_format($savings, 0, ',', '.'); ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                        <div class="flash-sale-card-top">
+                            <div class="flash-sale-card-icon-wrapper">
+                                <?php if ($is_image_icon): ?>
+                                    <img src="<?php echo htmlspecialchars($item['icon']); ?>" alt="" class="flash-sale-card-icon-img">
+                                <?php else: ?>
+                                    <?php echo htmlspecialchars($item['icon']); ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <div class="flash-sale-card-body">
+                            <span class="flash-sale-card-name"><?php echo htmlspecialchars($item['nama']); ?></span>
+                            <span class="flash-sale-card-category"><?php echo htmlspecialchars($item['kategori']); ?></span>
+                        </div>
+                        
+                        <div class="flash-sale-card-footer">
+                            <div class="flash-sale-price-wrapper">
+                                <?php if ($item['harga_normal'] > 0): ?>
+                                    <span class="flash-sale-price-old">
+                                        Rp <?php echo number_format($item['harga_normal'], 0, ',', '.'); ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="flash-sale-price-old" style="visibility: hidden;">Rp 0</span>
+                                <?php endif; ?>
+                                
+                                <span class="flash-sale-price-new">
+                                    <?php if ($item['harga_promo'] > 0): ?>
+                                        Rp <?php echo number_format($item['harga_promo'], 0, ',', '.'); ?>
+                                    <?php else: ?>
+                                        <?php echo $current_lang === 'id' ? 'Lihat Detail' : 'View Details'; ?>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            
+                            <div class="flash-sale-card-action">
+                                &rarr;
+                            </div>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
         </div>
-        
-        <button class="flash-sale-nav-btn next" id="fs-next">&rarr;</button>
     </div>
 </div>
 
