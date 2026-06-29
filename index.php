@@ -273,29 +273,68 @@ $flash_sale_items = $flashsale_data['items'];
         <?php endif; ?>
     </div>
 
-    <!-- Grid Game List -->
-    <div id="game-grid" class="game-grid">
-        <?php foreach ($games as $game): ?>
-            <div class="game-card" data-name="<?php echo strtolower(htmlspecialchars($game['nama_game'])); ?>">
-                <div>
-                    <div class="card-banner">
-                        <span class="card-banner-text"><?php echo htmlspecialchars($game['nama_game']); ?></span>
-                        <div class="banner-fade"></div>
-                    </div>
+    <?php
+    $premium_game_configs = [
+        'mobile-legends' => [
+            'image' => $base_url . 'assets/images/MLBB.png',
+            'color' => '220 80% 30%',
+        ],
+        'free-fire' => [
+            'image' => $base_url . 'assets/images/FREEFIRE.png',
+            'color' => '15 90% 45%',
+        ],
+        'pubg-mobile' => [
+            'image' => $base_url . 'assets/images/PUBG.png',
+            'color' => '40 85% 35%',
+        ],
+        'genshin-impact' => [
+            'image' => $base_url . 'assets/images/Genshin Impact.jpg',
+            'color' => '175 75% 25%',
+        ],
+    ];
+    ?>
 
-                    <div class="game-card-body">
-                        <h3 class="game-card-title"><?php echo htmlspecialchars($game['nama_game']); ?></h3>
-                        <p class="game-card-desc">
-                            <?php echo htmlspecialchars($game['deskripsi'] ? $game['deskripsi'] : 'Top up instan voucher game ' . $game['nama_game'] . ' termurah dan aman.'); ?>
-                        </p>
-                    </div>
-                </div>
+    <!-- Grid Game List (Premium Cards layout replacing the old one) -->
+    <div id="game-grid" class="game-grid premium-game-grid">
+        <?php foreach ($games as $game): 
+            $slug = $game['slug'];
+            $config = isset($premium_game_configs[$slug]) ? $premium_game_configs[$slug] : [
+                'image' => $base_url . 'assets/images/default.png',
+                'color' => '0 0% 50%'
+            ];
+            $imageUrl = $config['image'];
+            $themeColor = $config['color'];
+            $href = $base_url . 'user/topup/game.php?slug=' . $slug;
+            $gameName = $game['nama_game'];
+            $desc = $game['deskripsi'] ? $game['deskripsi'] : 'Top up instan voucher game ' . $gameName . ' termurah dan aman.';
+        ?>
+            <div class="game-card premium-game-card-wrapper" data-name="<?php echo strtolower(htmlspecialchars($gameName)); ?>" style="--theme-color: <?php echo $themeColor; ?>;">
+                <a href="<?php echo htmlspecialchars($href); ?>" class="premium-game-card" aria-label="Top up <?php echo htmlspecialchars($gameName); ?>">
+                    <!-- Background Image -->
+                    <div class="premium-card-bg" style="background-image: url('<?php echo htmlspecialchars($imageUrl); ?>');"></div>
 
-                <div class="game-card-footer">
-                    <a href="user/topup/game.php?slug=<?php echo $game['slug']; ?>" class="btn btn-primary btn-full-width">
-                        <?php echo __('topup_now'); ?>
-                    </a>
-                </div>
+                    <!-- Gradient Overlay -->
+                    <div class="premium-card-overlay"></div>
+
+                    <!-- Content -->
+                    <div class="premium-card-content">
+
+                        <!-- Bottom Content -->
+                        <div class="premium-card-bottom">
+                            <div class="premium-card-info">
+                                <h3 class="premium-game-title"><?php echo htmlspecialchars($gameName); ?></h3>
+                                <p class="premium-game-desc"><?php echo htmlspecialchars($desc); ?></p>
+                            </div>
+                            <div class="premium-card-btn">
+                                <span>Top Up Sekarang</span>
+                                <svg class="premium-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
         <?php endforeach; ?>
     </div>
@@ -306,6 +345,7 @@ $flash_sale_items = $flashsale_data['items'];
         <p class="no-game-alert-desc"><?php echo __('game_not_found_desc'); ?></p>
     </div>
 </div>
+
 
 <!-- Toast element -->
 <div class="toast" id="toast-notif">
