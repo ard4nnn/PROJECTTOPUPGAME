@@ -27,13 +27,10 @@ $flash_sale_subtitle = $flashsale_data['subtitle'];
 $flash_sale_items = $flashsale_data['items'];
 ?>
 
-<!-- Hidden Search input mapped from header search -->
 <input type="hidden" id="search-input">
 
-<!-- Promotional Slider -->
 <div class="carousel-container">
     <div class="carousel-track" id="carousel-track">
-        <!-- Slide 1: Rich HTML Promo tickets -->
         <div class="carousel-slide rich-slide">
             <div class="promo-content">
                 <div class="promo-left">
@@ -81,7 +78,6 @@ $flash_sale_items = $flashsale_data['items'];
             </div>
         </div>
         
-        <!-- Slide 2: Image Promo using generated asset -->
         <div class="carousel-slide img-slide" style="background-image: url('<?php echo $base_url; ?>assets/images/promo_banner.png');">
             <div class="slide-overlay">
                 <span class="badge badge-hot">HOT SELLING</span>
@@ -91,18 +87,15 @@ $flash_sale_items = $flashsale_data['items'];
         </div>
     </div>
     
-    <!-- Panah navigasi -->
     <button class="carousel-btn prev" id="carousel-prev">&larr;</button>
     <button class="carousel-btn next" id="carousel-next">&rarr;</button>
     
-    <!-- Indikator bullet -->
     <div class="carousel-dots" id="carousel-dots">
         <span class="dot active" onclick="setSlide(0)"></span>
         <span class="dot" onclick="setSlide(1)"></span>
     </div>
 </div>
 
-<!-- Flash Sale Section -->
 <div class="flash-sale-section">
     <div class="flash-sale-header">
         <div class="flash-sale-title-container">
@@ -274,6 +267,9 @@ $flash_sale_items = $flashsale_data['items'];
     </div>
 
     <?php
+    // KODE DI BAWAH INI UNTUK MENGATUR TAMPILAN GAMBAR DAN WARNA TEMA GAME DI HALAMAN DEPAN:
+    // Untuk menambah game baru, mengubah foto game, atau mengganti warna tema kartu game, edit/tambah daftar di bawah ini.
+    // Data produk dan harga game disimpan secara terpisah di file data/gamelist.php.
     $premium_game_configs = [
         'mobile-legends' => [
             'image' => $base_url . 'assets/images/MLBB.png',
@@ -294,7 +290,6 @@ $flash_sale_items = $flashsale_data['items'];
     ];
     ?>
 
-    <!-- Grid Game List (Premium Cards layout replacing the old one) -->
     <div id="game-grid" class="game-grid premium-game-grid">
         <?php foreach ($games as $game): 
             $slug = $game['slug'];
@@ -310,16 +305,9 @@ $flash_sale_items = $flashsale_data['items'];
         ?>
             <div class="game-card premium-game-card-wrapper" data-name="<?php echo strtolower(htmlspecialchars($gameName)); ?>" style="--theme-color: <?php echo $themeColor; ?>;">
                 <a href="<?php echo htmlspecialchars($href); ?>" class="premium-game-card" aria-label="Top up <?php echo htmlspecialchars($gameName); ?>">
-                    <!-- Background Image -->
                     <div class="premium-card-bg" style="background-image: url('<?php echo htmlspecialchars($imageUrl); ?>');"></div>
-
-                    <!-- Gradient Overlay -->
                     <div class="premium-card-overlay"></div>
-
-                    <!-- Content -->
                     <div class="premium-card-content">
-
-                        <!-- Bottom Content -->
                         <div class="premium-card-bottom">
                             <div class="premium-card-info">
                                 <h3 class="premium-game-title"><?php echo htmlspecialchars($gameName); ?></h3>
@@ -346,8 +334,6 @@ $flash_sale_items = $flashsale_data['items'];
     </div>
 </div>
 
-
-<!-- Toast element -->
 <div class="toast" id="toast-notif">
     <span class="toast-icon">📋</span>
     <span id="toast-text">Kode promo disalin!</span>
