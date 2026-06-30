@@ -1,4 +1,6 @@
 <?php
+// UNTUK MENAMBAH ATAU MENGUBAH GAME, NOMINAL TOP UP/HARGA PRODUK, DAN METODE PEMBAYARAN:
+// Edit data array di bawah ini. Pastikan slug game unik dan sinkron dengan index.php.
 return [
     'fallback_games' => [
         [
