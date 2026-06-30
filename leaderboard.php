@@ -25,7 +25,6 @@ if ($db_connected && $pdo) {
     }
 }
 
-// Fallback Mock Data if DB empty or offline
 if (!$db_loaded) {
     $leaderboard = [
         ['username' => 'SultanGamer99', 'total_spent' => 5450000],
@@ -38,7 +37,6 @@ if (!$db_loaded) {
     ];
 }
 
-// Function to map spendings to VIP titles
 if (!function_exists('getVipLevel')) {
     function getVipLevel($spent) {
         if ($spent >= 5000000) return 'Legendary VIP';
@@ -51,11 +49,11 @@ if (!function_exists('getVipLevel')) {
 
 if (!function_exists('getVipColor')) {
     function getVipColor($spent) {
-        if ($spent >= 5000000) return '#f59e0b'; // Gold
-        if ($spent >= 2500000) return '#a855f7'; // Purple
-        if ($spent >= 1000000) return '#3b82f6'; // Blue
-        if ($spent >= 500000) return '#10b981'; // Green
-        return '#64748b'; // Gray
+        if ($spent >= 5000000) return '#f59e0b';
+        if ($spent >= 2500000) return '#a855f7';
+        if ($spent >= 1000000) return '#3b82f6';
+        if ($spent >= 500000) return '#10b981';
+        return '#64748b';
     }
 }
 ?>
@@ -70,9 +68,7 @@ if (!function_exists('getVipColor')) {
         </p>
     </div>
 
-    <!-- Podiums for Top 3 Spenders -->
     <div class="podium-container">
-        <!-- Rank 2 -->
         <?php if (isset($leaderboard[1])): ?>
             <div class="podium-rank-2-3">
                 <span class="podium-medal">🥈</span>
@@ -84,7 +80,6 @@ if (!function_exists('getVipColor')) {
             </div>
         <?php endif; ?>
 
-        <!-- Rank 1 -->
         <?php if (isset($leaderboard[0])): ?>
             <div class="podium-rank-1">
                 <span class="podium-medal-crown">👑</span>
@@ -96,7 +91,6 @@ if (!function_exists('getVipColor')) {
             </div>
         <?php endif; ?>
 
-        <!-- Rank 3 -->
         <?php if (isset($leaderboard[2])): ?>
             <div class="podium-rank-2-3" style="order: 3;">
                 <span class="podium-medal">🥉</span>
@@ -109,7 +103,6 @@ if (!function_exists('getVipColor')) {
         <?php endif; ?>
     </div>
 
-    <!-- Leaderboard Table List -->
     <div class="card table-wrapper-card">
         <table class="leaderboard-table">
             <thead>

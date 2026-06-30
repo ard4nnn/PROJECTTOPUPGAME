@@ -38,7 +38,6 @@ if ($db_connected && isset($_SESSION['user_id'])) {
         </p>
     </div>
 
-    <!-- Table Card Container -->
     <div class="card table-wrapper-card">
         <table class="riwayat-table">
             <thead>
@@ -94,14 +93,12 @@ if ($db_connected && isset($_SESSION['user_id'])) {
         </table>
     </div>
 
-    <!-- Demo clearing panel -->
     <div id="clear-demo-container" class="clear-demo-container">
         <button id="btn-clear-demo" class="btn btn-outline btn-clear-demo">
             🗑️ <?php echo $current_lang === 'id' ? 'Bersihkan Riwayat Demo' : 'Clear Demo History'; ?>
         </button>
     </div>
 
-    <!-- Guide block -->
     <div class="card guide-card">
         <h4 class="guide-title">
             <?php echo $current_lang === 'id' ? 'Panduan Pembayaran & Proses Top Up:' : 'Payment & Top Up Guide:'; ?>

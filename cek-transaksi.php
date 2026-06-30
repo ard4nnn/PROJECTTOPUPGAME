@@ -10,7 +10,6 @@ $is_db_tx = false;
 if (!empty($search_id)) {
     if ($db_connected && $pdo) {
         try {
-            // Clean ID format
             $cleaned_id = preg_replace('/[^0-9]/', '', $search_id);
             $stmt = $pdo->prepare("
                 SELECT t.*, p.nama_produk, g.nama_game, m.nama as nama_metode
@@ -26,7 +25,6 @@ if (!empty($search_id)) {
                 $is_db_tx = true;
             }
         } catch (PDOException $e) {
-            // fallback
         }
     }
 }
@@ -47,7 +45,6 @@ if (!empty($search_id)) {
             </button>
         </form>
 
-        <!-- Container details for Javascript (Local Storage) or PHP (DB) -->
         <div id="tx-result-box" class="tx-result-box" style="display: <?php echo (!empty($search_id) && $transaction) ? 'block' : 'none'; ?>;">
             <h3 class="result-title">
                 📄 <?php echo __('tx_detail'); ?>

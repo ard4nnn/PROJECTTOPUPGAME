@@ -4,12 +4,9 @@ require_once 'includes/header.php';
 ?>
 
 <div class="container">
-    <!-- Grid Layout -->
     <div class="calc-container-grid">
         
-        <!-- Left Sidebar Navigation -->
         <div class="calc-sidebar">
-            <!-- Win Rate Menu -->
             <div class="calc-menu-card active" id="menu-wr" onclick="switchCalcPanel('wr')">
                 <div class="calc-menu-icon">📈</div>
                 <div class="calc-menu-info">
@@ -18,7 +15,6 @@ require_once 'includes/header.php';
                 </div>
             </div>
             
-            <!-- Magic Wheel Menu -->
             <div class="calc-menu-card" id="menu-mw" onclick="switchCalcPanel('mw')">
                 <div class="calc-menu-icon">🎡</div>
                 <div class="calc-menu-info">
@@ -27,7 +23,6 @@ require_once 'includes/header.php';
                 </div>
             </div>
             
-            <!-- Zodiac Menu -->
             <div class="calc-menu-card" id="menu-zodiac" onclick="switchCalcPanel('zodiac')">
                 <div class="calc-menu-icon">🌌</div>
                 <div class="calc-menu-info">
@@ -37,10 +32,8 @@ require_once 'includes/header.php';
             </div>
         </div>
 
-        <!-- Right Content Panels -->
         <div class="card calc-panel-card">
             
-            <!-- PANEL 1: Win Rate Calculator -->
             <div class="calc-panel active" id="panel-wr">
                 <div class="calc-panel-header">
                     <h2 class="calc-panel-title"><?php echo __('wr_calc'); ?></h2>
@@ -74,7 +67,6 @@ require_once 'includes/header.php';
                 </div>
             </div>
 
-            <!-- PANEL 2: Magic Wheel Calculator -->
             <div class="calc-panel" id="panel-mw">
                 <div class="calc-panel-header">
                     <h2 class="calc-panel-title"><?php echo __('mw_calc'); ?></h2>
@@ -107,7 +99,6 @@ require_once 'includes/header.php';
                 </div>
             </div>
 
-            <!-- PANEL 3: Zodiac Calculator -->
             <div class="calc-panel" id="panel-zodiac">
                 <div class="calc-panel-header">
                     <h2 class="calc-panel-title"><?php echo $current_lang === 'id' ? 'Kalkulator Zodiac' : 'Zodiac Calculator'; ?></h2>
@@ -123,7 +114,6 @@ require_once 'includes/header.php';
                     <input type="range" id="zodiac-slider" class="zodiac-range" min="0" max="100" value="0" oninput="updateZodiacValue(this.value)">
                 </div>
 
-                <!-- Dynamic display under slider -->
                 <div class="zodiac-stats">
                     <div class="zodiac-stat-label">
                         <?php echo $current_lang === 'id' ? 'Poin Bintang Kamu' : 'Your Star Points'; ?> <span id="zodiac-points-display" class="zodiac-stat-val">0</span>
