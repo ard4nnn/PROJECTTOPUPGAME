@@ -67,31 +67,324 @@ if (!$db_connected || !$game) {
             
             <div class="topup-left-col">
                 
-                <div class="card game-info-card">
-                    <div class="game-category-badge">
-                        GAME VOUCHER
+                <?php
+                $cover_mapping = [
+                    'mobile-legends' => 'MLBB.png',
+                    'free-fire' => 'FREEFIRE.png',
+                    'pubg-mobile' => 'PUBG.png',
+                    'genshin-impact' => 'Genshin Impact.jpg',
+                ];
+                $dev_mapping = [
+                    'mobile-legends' => 'Moonton',
+                    'free-fire' => 'Garena',
+                    'pubg-mobile' => 'Tencent Games',
+                    'genshin-impact' => 'miHoYo',
+                ];
+
+                $game_slug = $game['slug'] ?? ($slug ?? 'default');
+                $cover_file = isset($cover_mapping[$game_slug]) ? $cover_mapping[$game_slug] : 'MLBB.png';
+                $cover_path = $base_url . "assets/images/" . $cover_file;
+                $fallback = $base_url . "assets/images/MLBB.png";
+
+                $game_name = $game['nama_game'] ?? 'Game';
+                $game_dev = $game['developer'] ?? ($dev_mapping[$game_slug] ?? 'Game Publisher');
+                $game_desc = $game['deskripsi'] ?? 'Top up instan termurah.';
+                ?>
+
+                <style>
+                /* === FUNtopup Game Cover Section === */
+                .funtopup-game-cover {
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 1rem;
+                  padding: 1.25rem;
+                }
+
+                .funtopup-cover-img-wrap {
+                  position: relative;
+                  flex-shrink: 0;
+                  width: 130px;
+                  height: 158px;
+                  border-radius: 10px;
+                  overflow: hidden;
+                  border: 2px solid rgba(251, 191, 36, 0.28);
+                  box-shadow:
+                    0 0 20px rgba(251, 191, 36, 0.10),
+                    0 4px 16px rgba(0, 0, 0, 0.55);
+                }
+
+                .funtopup-cover-img-wrap img {
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+                  display: block;
+                  transition: transform 0.3s ease;
+                }
+
+                .funtopup-cover-img-wrap:hover img {
+                  transform: scale(1.04);
+                }
+
+                /* Badge negara di atas foto */
+                .funtopup-cover-badge {
+                  position: absolute;
+                  bottom: 8px;
+                  left: 50%;
+                  transform: translateX(-50%);
+                  background: rgba(0, 0, 0, 0.78);
+                  backdrop-filter: blur(5px);
+                  -webkit-backdrop-filter: blur(5px);
+                  border: 1px solid rgba(255, 255, 255, 0.12);
+                  border-radius: 5px;
+                  padding: 3px 8px;
+                  font-size: 9.5px;
+                  font-weight: 800;
+                  color: #fff;
+                  white-space: nowrap;
+                  letter-spacing: 0.06em;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                }
+
+                /* Panel info game (kanan foto) */
+                .funtopup-cover-info {
+                  flex: 1;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.25rem;
+                  padding-top: 2px;
+                }
+
+                /* Badge "GAME VOUCHER" kuning */
+                .funtopup-voucher-badge {
+                  display: inline-block;
+                  background: #FBBF24;
+                  color: #1a1000;
+                  font-size: 9.5px;
+                  font-weight: 900;
+                  padding: 2px 8px;
+                  border-radius: 4px;
+                  letter-spacing: 0.12em;
+                  width: fit-content;
+                  margin-bottom: 2px;
+                }
+
+                /* Nama game */
+                .funtopup-cover-title {
+                  font-size: 1.35rem;
+                  font-weight: 900;
+                  color: #ffffff;
+                  line-height: 1.1;
+                  margin-top: 4px;
+                }
+
+                /* Developer/Publisher */
+                .funtopup-cover-dev {
+                  font-size: 0.72rem;
+                  color: #777;
+                  letter-spacing: 0.02em;
+                  margin-top: 1px;
+                }
+
+                /* Daftar fitur (Proses Cepat, dll) */
+                .funtopup-cover-features {
+                  list-style: none;
+                  padding: 0;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  margin-top: 8px;
+                }
+
+                .funtopup-cover-features li {
+                  font-size: 0.75rem;
+                  color: #aaa;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                }
+
+                .funtopup-cover-features li .fi {
+                  font-size: 12px;
+                  flex-shrink: 0;
+                }
+
+                /* Deskripsi singkat */
+                .funtopup-cover-desc {
+                  font-size: 0.77rem;
+                  color: #666;
+                  margin-top: 8px;
+                  line-height: 1.45;
+                }
+
+                /* Responsive: layar kecil / mobile */
+                @media (max-width: 480px) {
+                  .funtopup-game-cover {
+                    gap: 0.75rem;
+                    padding: 0.75rem;
+                  }
+                  .funtopup-cover-img-wrap {
+                    width: 100px;
+                    height: 120px;
+                  }
+                  .funtopup-cover-title {
+                    font-size: 1.1rem;
+                  }
+                }
+                </style>
+
+                <div class="card game-info-card" style="padding: 0; overflow: hidden;">
+                  <div class="funtopup-game-cover">
+                    <!-- Foto cover game -->
+                    <div class="funtopup-cover-img-wrap">
+                      <img
+                        src="<?php echo htmlspecialchars($cover_path); ?>"
+                        alt="<?php echo htmlspecialchars($game_name); ?>"
+                        onerror="this.onerror=null; this.src='<?php echo htmlspecialchars($fallback); ?>'"
+                      >
                     </div>
-                    <h2 class="game-info-title"><?php echo htmlspecialchars($game['nama_game']); ?></h2>
-                    <p class="game-info-desc">
-                        <?php echo htmlspecialchars($game['deskripsi'] ? $game['deskripsi'] : 'Top up instan termurah.'); ?>
-                    </p>
+
+                    <!-- Info game -->
+                    <div class="funtopup-cover-info">
+                      <h1 class="funtopup-cover-title"><?php echo htmlspecialchars($game_name); ?></h1>
+                      <p class="funtopup-cover-dev"><?php echo htmlspecialchars($game_dev); ?></p>
+                      <ul class="funtopup-cover-features">
+                        <li><span class="fi">⚡</span> Proses Cepat</li>
+                        <li><span class="fi">✅</span> Aman &amp; Terpercaya</li>
+                        <li><span class="fi">🕐</span> 24 Jam Non-Stop</li>
+                      </ul>
+                      <p class="funtopup-cover-desc">
+                        <?php echo htmlspecialchars($game_desc); ?>
+                      </p>
+                    </div>
+                  </div>
                 </div>
+
+                <?php
+                $is_ml = ($game_slug === 'mobile-legends');
+                $is_genshin = ($game_slug === 'genshin-impact');
+                $needs_server = ($is_ml || $is_genshin);
+
+                $id_label = $is_genshin ? 'UID' : 'ID';
+                
+                if ($current_lang === 'id') {
+                    $id_placeholder = $is_genshin ? 'Masukkan UID' : 'Masukkan ID';
+                    $server_placeholder = 'Masukkan Server';
+                    $hint_text = $is_genshin 
+                        ? 'Masukkan UID Game Anda dengan benar. Kami tidak bertanggung jawab atas kesalahan input UID.' 
+                        : 'Masukkan ID Game Anda dengan benar. Kami tidak bertanggung jawab atas kesalahan input ID.';
+                } else {
+                    $id_placeholder = $is_genshin ? 'Enter UID' : 'Enter ID';
+                    $server_placeholder = 'Enter Server';
+                    $hint_text = $is_genshin 
+                        ? 'Ensure your Game UID is correct. We are not responsible for incorrect inputs.' 
+                        : 'Ensure your Game ID is correct. We are not responsible for incorrect inputs.';
+                }
+                ?>
+
+                <style>
+                /* Account Input Grid */
+                .funtopup-account-grid {
+                  display: grid;
+                  grid-template-columns: 1fr;
+                  gap: 16px;
+                }
+                @media (min-width: 480px) {
+                  .funtopup-account-grid.has-server {
+                    grid-template-columns: 1fr 1fr;
+                  }
+                }
+                .funtopup-input-wrapper {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+                  position: relative;
+                }
+                .funtopup-label-with-icon {
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                }
+                .funtopup-info-icon {
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: 14px;
+                  height: 14px;
+                  border: 1px solid var(--text-muted);
+                  color: var(--text-muted);
+                  border-radius: 50%;
+                  font-size: 9px;
+                  font-weight: bold;
+                  cursor: help;
+                  user-select: none;
+                }
+                </style>
 
                 <div class="card">
                     <h3 class="topup-step-title">
                         <span class="topup-step-number">1</span>
-                        <?php echo $current_lang === 'id' ? 'Lengkapi Data Akun' : 'Enter Account Details'; ?>
+                        <?php echo $current_lang === 'id' ? 'Masukkan Data Akun' : 'Enter Account Details'; ?>
                     </h3>
+                    
                     <div class="topup-form-group">
-                        <label for="id_game_user" class="topup-label"><?php echo __('target_id'); ?></label>
-                        <input type="text" id="id_game_user" placeholder="<?php echo $current_lang === 'id' ? 'Masukkan ID Game Anda (contoh: 1284759)' : 'Enter Game ID (e.g. 1284759)'; ?>" class="topup-input">
-                        <small class="topup-hint">
-                            <?php echo $current_lang === 'id' 
-                                ? 'Masukkan ID Game Anda dengan benar. Kami tidak bertanggung jawab atas kesalahan input ID.' 
-                                : 'Ensure your Game ID is correct. We are not responsible for incorrect inputs.'; ?>
+                        <div class="funtopup-account-grid <?php echo $needs_server ? 'has-server' : ''; ?>">
+                            <!-- Visible ID/UID Field -->
+                            <div class="funtopup-input-wrapper">
+                                <label for="visible_id_game_user" class="topup-label funtopup-label-with-icon">
+                                    <?php echo $id_label; ?>
+                                    <span class="funtopup-info-icon" title="Masukkan ID/UID akun game Anda">i</span>
+                                </label>
+                                <input type="text" id="visible_id_game_user" placeholder="<?php echo $id_placeholder; ?>" class="topup-input">
+                            </div>
+
+                            <?php if ($needs_server): ?>
+                                <!-- Visible Server Field -->
+                                <div class="funtopup-input-wrapper">
+                                    <label for="server_game_user" class="topup-label">Server</label>
+                                    <input type="text" id="server_game_user" placeholder="<?php echo $server_placeholder; ?>" class="topup-input">
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Proxy Hidden input for existing JS integration -->
+                        <input type="hidden" id="id_game_user" name="id_game_user">
+
+                        <small class="topup-hint" style="margin-top: 10px; display: block;">
+                            <?php echo $hint_text; ?>
                         </small>
                     </div>
                 </div>
+
+                <script>
+                (function() {
+                    const hiddenInput = document.getElementById('id_game_user');
+                    const visibleIdInput = document.getElementById('visible_id_game_user');
+                    const serverInput = document.getElementById('server_game_user');
+
+                    if (hiddenInput && visibleIdInput) {
+                        function syncInput() {
+                            const idVal = visibleIdInput.value.trim();
+                            const serverVal = serverInput ? serverInput.value.trim() : '';
+                            
+                            if (serverVal) {
+                                hiddenInput.value = idVal + " (" + serverVal + ")";
+                            } else {
+                                hiddenInput.value = idVal;
+                            }
+                            
+                            // Trigger validation event
+                            hiddenInput.dispatchEvent(new Event('input'));
+                        }
+
+                        visibleIdInput.addEventListener('input', syncInput);
+                        if (serverInput) {
+                            serverInput.addEventListener('input', syncInput);
+                        }
+                    }
+                })();
+                </script>
 
                 <div class="card">
                     <h3 class="topup-step-title">
