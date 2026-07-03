@@ -1,0 +1,289 @@
+/* dashboard.css */
+:root {
+  --ft-bg-dark: #0b0e11;
+  --ft-bg-card: #1e2329;
+  --ft-yellow: #fcd535;
+  --ft-yellow-hover: #f0b90b;
+  --ft-border: #2b3139;
+  --ft-text: #eaecef;
+  --ft-text-muted: #707a8a;
+  --ft-danger: #f6465d;
+  --ft-success: #0ecb81;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--ft-bg-dark);
+  color: var(--ft-text);
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Layout Wrapper */
+.ft-wrapper {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .ft-wrapper {
+    flex-direction: row;
+  }
+}
+
+/* Sidebar Styling */
+.ft-sidebar {
+  width: 100%;
+  background-color: #0f1115;
+  border-bottom: 1px solid var(--ft-border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .ft-sidebar {
+    width: 260px;
+    min-height: 100vh;
+    border-bottom: none;
+    border-right: 1px solid var(--ft-border);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+}
+
+.ft-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.ft-sidebar-logo-icon {
+  width: 24px;
+  height: 30px;
+  fill: var(--ft-yellow);
+}
+
+.ft-sidebar-logo-text {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--ft-yellow);
+  font-style: italic;
+}
+
+.ft-sidebar-logo-text span {
+  color: #fff;
+  font-style: normal;
+  font-weight: 500;
+  margin-left: 2px;
+}
+
+.ft-sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--ft-bg-card);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 1px solid var(--ft-border);
+}
+
+.ft-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--ft-yellow);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.ft-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ft-user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+}
+
+.ft-user-level {
+  font-size: 12px;
+  color: var(--ft-text-muted);
+}
+
+.ft-sidebar-nav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .ft-sidebar-nav {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+}
+
+.ft-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--ft-text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  width: auto;
+}
+
+@media (min-width: 768px) {
+  .ft-nav-link {
+    width: 100%;
+  }
+}
+
+.ft-nav-link:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.ft-nav-link.active {
+  color: #000;
+  background-color: var(--ft-yellow);
+  font-weight: 700;
+}
+
+.ft-nav-logout {
+  color: var(--ft-danger);
+}
+
+.ft-nav-logout:hover {
+  background-color: rgba(246, 70, 93, 0.1);
+  color: var(--ft-danger);
+}
+
+/* Main Content Styling */
+.ft-main {
+  flex: 1;
+  padding: 24px;
+}
+
+@media (min-width: 768px) {
+  .ft-main {
+    margin-left: 260px;
+    padding: 40px;
+  }
+}
+
+/* Page Header */
+.ft-page-header {
+  margin-bottom: 32px;
+}
+
+.ft-page-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.ft-page-sub {
+  font-size: 14px;
+  color: var(--ft-text-muted);
+  margin: 0;
+}
+
+/* Card Styling */
+.ft-card {
+  background-color: var(--ft-bg-card);
+  border: 1px solid var(--ft-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+/* Form Styling */
+.ft-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.ft-input {
+  width: 100%;
+  height: 44px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--ft-border);
+  border-radius: 8px;
+  color: #fff;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.ft-input:focus {
+  outline: none;
+  border-color: var(--ft-yellow);
+  box-shadow: 0 0 0 2px rgba(252, 213, 53, 0.15);
+}
+
+.ft-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* Button Styling */
+.ft-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.ft-btn-primary {
+  background-color: var(--ft-yellow);
+  color: #000;
+}
+
+.ft-btn-primary:hover {
+  background-color: var(--ft-yellow-hover);
+}
+
+.ft-btn-secondary {
+  background-color: transparent;
+  color: var(--ft-yellow);
+  border: 1px solid var(--ft-yellow);
+}
+
+.ft-btn-secondary:hover {
+  background-color: rgba(252, 213, 53, 0.05);
+}
