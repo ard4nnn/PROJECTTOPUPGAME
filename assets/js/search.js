@@ -30,9 +30,26 @@ if (headerSearch && searchSuggest) {
             matches.forEach(game => {
                 const initials = game.name.split(' ').map(n => n[0]).join('');
                 const topupLink = window.baseUrl + 'user/topup/game.php?slug=' + game.slug;
+                
+                // Map game slug to asset image filename
+                const gameImages = {
+                    'mobile-legends': 'MLBB.png',
+                    'free-fire': 'FREEFIRE.png',
+                    'pubg-mobile': 'PUBG.png',
+                    'genshin-impact': 'Genshin Impact.jpg'
+                };
+                
+                let bannerContent = `<div class="suggest-banner">${initials}</div>`;
+                if (gameImages[game.slug]) {
+                    const imgUrl = window.baseUrl + 'assets/images/' + gameImages[game.slug];
+                    bannerContent = `<div class="suggest-banner" style="background: transparent; padding: 0; overflow: hidden; border: 1px solid var(--card-border);">
+                        <img src="${imgUrl}" alt="${game.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    </div>`;
+                }
+
                 html += `
                     <a href="${topupLink}" class="suggest-item">
-                        <div class="suggest-banner">${initials}</div>
+                        ${bannerContent}
                         <div class="suggest-info">
                             <span class="suggest-name">${game.name}</span>
                             <span class="suggest-desc">${game.desc}</span>

@@ -80,6 +80,6 @@
     window.baseUrl = '<?php echo $base_url; ?>';
 </script>
 <script src="<?php echo $base_url; ?>assets/js/language.js"></script>
-<script src="<?php echo $base_url; ?>assets/js/search.js"></script>
+<script src="<?php echo $base_url; ?>assets/js/search.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
