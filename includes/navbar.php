@@ -97,12 +97,9 @@
                         </svg>
                         <span><?php echo __('riwayat'); ?></span>
                     </a>
-                    <span class="nav-balance">
-                        🟡 Rp <?php echo number_format($_SESSION['saldo'] ?? 100000, 0, ',', '.'); ?>
-                    </span>
-                    <span class="nav-username">
+                    <a href="<?php echo $base_url; ?>user/dashboard/profil.php" class="nav-username" style="text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--text-color)'">
                         <?php echo __('halo'); ?>, <?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>
-                    </span>
+                    </a>
                     <a href="<?php echo $base_url; ?>user/auth/logout.php" class="btn-masuk btn-logout">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="btn-logout-icon">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
