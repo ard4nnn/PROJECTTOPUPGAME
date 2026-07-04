@@ -91,6 +91,12 @@
             <!-- Right nav links -->
             <nav class="nav-right-links">
                 <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="<?php echo $base_url; ?>user/dashboard/index.php" class="nav-item <?php echo ($current_page == 'index.php' && strpos($_SERVER['PHP_SELF'], 'user/dashboard') !== false) ? 'active' : ''; ?>">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"></path>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
                     <a href="<?php echo $base_url; ?>user/riwayat.php" class="nav-item <?php echo ($current_page == 'riwayat.php') ? 'active' : ''; ?>">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
