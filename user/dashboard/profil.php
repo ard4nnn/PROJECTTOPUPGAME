@@ -1,480 +1,281 @@
 <?php
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-// 1. KEAMANAN & SESSION
-// Cek jika $_SESSION['user_id'] kosong, redirect ke '../auth/login.php'
-if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
-    header("Location: ../auth/login.php");
+if (empty($_SESSION['user_id'])) {
+    header('Location: ../auth/login.php');
     exit;
 }
 
-// Hubungkan database menggunakan require_once '../../config/db.php'
 require_once '../../config/db.php';
 
-// Inisialisasi variabel pesan
-$success_msg = '';
-$error_msg = '';
-
 $user_id = $_SESSION['user_id'];
+$msg_sukses = '';
+$msg_error  = '';
+$user = null;
 
-// Deteksi dinamis nama kolom no hp/telepon di tabel 'users' untuk mencegah SQL error
-$db_phone_col = 'phone'; // default
+// Deteksi dinamis nama kolom telepon (no_hp / phone) di tabel users
+$db_phone_col = 'no_hp';
 if ($db_connected && $pdo) {
     try {
         $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'phone'");
-        if ($stmt->rowCount() == 0) {
+        if ($stmt->rowCount() > 0) {
+            $db_phone_col = 'phone';
+        } else {
             $stmt2 = $pdo->query("SHOW COLUMNS FROM users LIKE 'no_hp'");
             if ($stmt2->rowCount() > 0) {
                 $db_phone_col = 'no_hp';
             }
         }
     } catch (PDOException $e) {
-        $db_phone_col = 'no_hp'; // fallback aman
+        $db_phone_col = 'no_hp';
     }
 }
 
-// Ambil data user terbaru dari database (jika database terkoneksi)
-$current_username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
-$current_email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
-$current_phone = isset($_SESSION['phone']) ? $_SESSION['phone'] : '';
-
+// Ambil data user
 if ($db_connected && $pdo) {
     try {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$user_id]);
-        $user = $stmt->fetch();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Sinkronisasi data ke session
         if ($user) {
-            $current_username = $user['username'];
-            $current_email = $user['email'];
-            $current_phone = isset($user[$db_phone_col]) ? $user[$db_phone_col] : '';
-            
-            // Sinkronisasi session dengan data database terbaru
-            $_SESSION['username'] = $current_username;
-            $_SESSION['email'] = $current_email;
-            $_SESSION['phone'] = $current_phone;
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'] ?? '';
+            $_SESSION['no_hp'] = $user[$db_phone_col] ?? '';
+            $_SESSION['phone'] = $user[$db_phone_col] ?? '';
         }
     } catch (PDOException $e) {
-        // Fallback menggunakan session jika query gagal
+        // Fallback ke session jika query error
     }
 }
 
-// 2. PROSES UPDATE DATA (PHP LOGIC)
+// Fallback profil jika DB offline
+if (!$user) {
+    $user = [
+        'username' => $_SESSION['username'] ?? 'User',
+        'email' => $_SESSION['email'] ?? 'demo@example.com',
+        'no_hp' => $_SESSION['no_hp'] ?? $_SESSION['phone'] ?? '-',
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    $user[$db_phone_col] = $user['no_hp'];
+}
+
+// Handle Form Submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    // FORM 1: UPDATE BIODATA PROFIL
-    if (isset($_POST['action']) && $_POST['action'] === 'update_profile') {
-        $username = trim($_POST['username']);
-        $email = trim($_POST['email']);
-        $phone = trim($_POST['phone']);
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'update_profil') {
+        $username = trim($_POST['username'] ?? '');
+        $email    = trim($_POST['email']    ?? '');
+        $phone    = trim($_POST['phone']    ?? '');
         
-        // Validasi input sederhana
-        if (empty($username) || empty($email) || empty($phone)) {
-            $error_msg = "Semua field biodata wajib diisi!";
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error_msg = "Format email tidak valid!";
-        } else {
+        if ($username && $email) {
             if ($db_connected && $pdo) {
                 try {
-                    // Pastikan username atau email tidak duplikat dengan user lain
+                    // Cek username/email unik
                     $stmt = $pdo->prepare("SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?");
                     $stmt->execute([$username, $email, $user_id]);
                     
                     if ($stmt->rowCount() > 0) {
-                        $error_msg = "Username atau email sudah digunakan oleh pengguna lain!";
+                        $msg_error = 'Username atau email sudah digunakan oleh pengguna lain.';
                     } else {
-                        // Update ke database
-                        $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, {$db_phone_col} = ? WHERE id = ?");
+                        // Update biodata
+                        $stmt = $pdo->prepare("UPDATE users SET username=?, email=?, {$db_phone_col}=? WHERE id=?");
                         $stmt->execute([$username, $email, $phone, $user_id]);
                         
-                        // Perbarui $_SESSION agar langsung berubah real-time di sidebar/navbar
                         $_SESSION['username'] = $username;
                         $_SESSION['email'] = $email;
+                        $_SESSION['no_hp'] = $phone;
                         $_SESSION['phone'] = $phone;
                         
-                        // Perbarui variabel tampilan
-                        $current_username = $username;
-                        $current_email = $email;
-                        $current_phone = $phone;
+                        $user['username'] = $username;
+                        $user['email']    = $email;
+                        $user[$db_phone_col] = $phone;
                         
-                        $success_msg = "Biodata profil Anda berhasil diperbarui!";
+                        $msg_sukses = 'Profil berhasil diperbarui!';
                     }
                 } catch (PDOException $e) {
-                    $error_msg = "Gagal memperbarui data: " . $e->getMessage();
+                    $msg_error = 'Gagal memperbarui profil di database: ' . $e->getMessage();
                 }
             } else {
-                // Mode Demo (Jika MySQL mati)
+                // Mode Demo (Offline)
                 $_SESSION['username'] = $username;
                 $_SESSION['email'] = $email;
+                $_SESSION['no_hp'] = $phone;
                 $_SESSION['phone'] = $phone;
                 
-                $current_username = $username;
-                $current_email = $email;
-                $current_phone = $phone;
+                $user['username'] = $username;
+                $user['email']    = $email;
+                $user[$db_phone_col] = $phone;
                 
-                $success_msg = "Biodata profil berhasil diperbarui! (Mode Demo Aktif)";
+                $msg_sukses = 'Profil berhasil diperbarui! (Mode Demo Aktif)';
             }
+        } else {
+            $msg_error = 'Username dan email tidak boleh kosong.';
         }
     }
-    
-    // FORM 2: UPDATE PASSWORD
-    if (isset($_POST['action']) && $_POST['action'] === 'update_password') {
-        $old_password = $_POST['old_password'];
-        $new_password = $_POST['new_password'];
-        $confirm_password = $_POST['confirm_password'];
+
+    if ($action === 'ganti_password') {
+        $pw_lama  = $_POST['pw_lama']  ?? '';
+        $pw_baru  = $_POST['pw_baru']  ?? '';
+        $pw_konfirm = $_POST['pw_konfirm'] ?? '';
         
-        // Validasi input
-        if (empty($old_password) || empty($new_password) || empty($confirm_password)) {
-            $error_msg = "Semua field password wajib diisi!";
-        } elseif (strlen($new_password) < 6) {
-            $error_msg = "Password baru minimal terdiri dari 6 karakter!";
-        } elseif ($new_password !== $confirm_password) {
-            $error_msg = "Konfirmasi password baru tidak cocok!";
-        } else {
+        if ($pw_lama && $pw_baru && $pw_konfirm) {
             if ($db_connected && $pdo) {
                 try {
-                    // Ambil password lama dari database
+                    // Ambil password lama dari DB
                     $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
                     $stmt->execute([$user_id]);
-                    $user_db = $stmt->fetch();
+                    $hash_lama = $stmt->fetchColumn();
                     
-                    if ($user_db && password_verify($old_password, $user_db['password'])) {
-                        // Hash password baru wajib menggunakan password_hash($password, PASSWORD_DEFAULT)
-                        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                        
-                        // Update ke database
-                        $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
-                        $stmt->execute([$hashed_password, $user_id]);
-                        
-                        $success_msg = "Password Anda berhasil diperbarui!";
+                    if ($hash_lama && password_verify($pw_lama, $hash_lama)) {
+                        if (strlen($pw_baru) >= 6) {
+                            if ($pw_baru === $pw_konfirm) {
+                                $hash_baru = password_hash($pw_baru, PASSWORD_DEFAULT);
+                                $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                                $stmt->execute([$hash_baru, $user_id]);
+                                $msg_sukses = 'Password berhasil diubah!';
+                            } else {
+                                $msg_error = 'Konfirmasi password tidak cocok.';
+                            }
+                        } else {
+                            $msg_error = 'Password baru minimal 6 karakter.';
+                        }
                     } else {
-                        $error_msg = "Password lama yang Anda masukkan salah!";
+                        $msg_error = 'Password lama tidak sesuai.';
                     }
                 } catch (PDOException $e) {
-                    $error_msg = "Gagal memperbarui password: " . $e->getMessage();
+                    $msg_error = 'Gagal mengubah password di database.';
                 }
             } else {
-                // Mode Demo (Jika MySQL mati)
-                if (strlen($old_password) >= 4) {
-                    $success_msg = "Password berhasil diperbarui! (Simulasi Mode Demo)";
+                // Mode Demo (Offline)
+                if (strlen($pw_baru) >= 6) {
+                    if ($pw_baru === $pw_konfirm) {
+                        $msg_sukses = 'Password berhasil diubah! (Simulasi Mode Demo)';
+                    } else {
+                        $msg_error = 'Konfirmasi password baru tidak cocok.';
+                    }
                 } else {
-                    $error_msg = "Simulasi Gagal: Password lama minimal 4 karakter untuk demo.";
+                    $msg_error = 'Password baru minimal 6 karakter.';
                 }
             }
+        } else {
+            $msg_error = 'Semua input password wajib diisi.';
         }
     }
 }
+
+$avatar_char = strtoupper(substr($user['username'] ?? 'U', 0, 1));
+
+// Load header website
+require_once '../../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="id" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profil - FUNtopup</title>
-    <!-- Google Fonts Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Load dashboard.css -->
-    <link rel="stylesheet" href="dashboard.css">
-    <style>
-        /* CSS tambahan untuk memastikan visual premium & grid responsif jika dashboard.css minimal */
-        :root {
-            --ft-bg-dark: #0b0e11;
-            --ft-bg-card: #1e2329;
-            --ft-yellow: #fcd535;
-            --ft-yellow-hover: #f0b90b;
-            --ft-border: #2b3139;
-            --ft-text: #eaecef;
-            --ft-text-muted: #707a8a;
-            --ft-danger: #f6465d;
-            --ft-success: #0ecb81;
-        }
-        
-        body {
-            background-color: var(--ft-bg-dark);
-            color: var(--ft-text);
-            font-family: 'Outfit', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+<!-- Link dashboard styling -->
+<link rel="stylesheet" href="dashboard.css">
 
-        .ft-grid-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-            margin-top: 24px;
-        }
+<div class="ft-wrapper">
+<?php include 'sidebar.php'; ?>
+<main class="ft-main">
 
-        @media (min-width: 992px) {
-            .ft-grid-container {
-                grid-template-columns: 1.2fr 0.8fr;
-            }
-        }
+  <div class="ft-page-header">
+    <h1 class="ft-page-title">Profil Saya</h1>
+    <p class="ft-page-sub">
+        Kelola informasi akun FUNtopup kamu.
+        <?php if (!$db_connected): ?>
+            <span style="color:#FBBF24; font-weight:800; margin-left:10px;">[🔌 Mode Demo Aktif]</span>
+        <?php endif; ?>
+    </p>
+  </div>
 
-        /* Alert Styling */
-        .ft-alert {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            font-size: 14px;
-            font-weight: 500;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        .ft-alert-success {
-            background-color: rgba(14, 203, 129, 0.1);
-            border: 1px solid rgba(14, 203, 129, 0.25);
-            color: var(--ft-success);
-        }
-        
-        .ft-alert-error {
-            background-color: rgba(246, 70, 93, 0.1);
-            border: 1px solid rgba(246, 70, 93, 0.25);
-            color: var(--ft-danger);
-        }
+  <?php if($msg_sukses): ?>
+    <div style="background:rgba(20,83,45,0.3);border:1px solid #14532d;color:#4ade80;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.85rem;" id="alert-sukses">✅ <?=htmlspecialchars($msg_sukses)?></div>
+  <?php endif; ?>
+  <?php if($msg_error): ?>
+    <div style="background:rgba(127,29,29,0.3);border:1px solid #7f1d1d;color:#f87171;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.85rem;" id="alert-error">⚠ <?=htmlspecialchars($msg_error)?></div>
+  <?php endif; ?>
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Form Controls styling */
-        .ft-form-group {
-            margin-bottom: 20px;
-        }
-
-        .ft-form-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .ft-input-desc {
-            font-size: 12px;
-            color: var(--ft-text-muted);
-            margin-top: 6px;
-        }
-
-        /* Demo Mode Badge styling */
-        .ft-badge-demo {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background-color: rgba(252, 213, 53, 0.1);
-            border: 1px solid rgba(252, 213, 53, 0.3);
-            color: var(--ft-yellow);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- 3. DESAIN & TAMPILAN (HTML/UI) -->
-    <!-- Struktur layout pembungkus dashboard -->
-    <div class="ft-wrapper">
-        
-        <!-- Include sidebar.php -->
-        <?php include 'sidebar.php'; ?>
-        
-        <!-- Main Content Area -->
-        <main class="ft-main">
-            
-            <!-- Page Header -->
-            <div class="ft-page-header">
-                <h1 class="ft-page-title">Pengaturan Profil</h1>
-                <p class="ft-page-sub">Kelola informasi akun Anda dan perbarui kata sandi keamanan Anda di sini.</p>
-                
-                <?php if (!$db_connected): ?>
-                    <div class="ft-badge-demo">
-                        <span>🔌 Mode Demo Aktif (Database Offline)</span>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Tampilkan Pesan Sukses / Error di bagian atas form -->
-            <?php if (!empty($success_msg)): ?>
-                <div class="ft-alert ft-alert-success" id="alert-success">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                    <span><strong>Sukses!</strong> <?php echo htmlspecialchars($success_msg); ?></span>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($error_msg)): ?>
-                <div class="ft-alert ft-alert-error" id="alert-error">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    <span><strong>Gagal!</strong> <?php echo htmlspecialchars($error_msg); ?></span>
-                </div>
-            <?php endif; ?>
-
-            <!-- Grid Layout untuk Form -->
-            <div class="ft-grid-container">
-                
-                <!-- Left Side: Form 1 - Biodata Profil -->
-                <div class="ft-card">
-                    <div style="border-bottom: 1px solid var(--ft-border); padding-bottom: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fcd535" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        <h3 style="margin: 0; font-size: 18px; font-weight: 700; text-transform: uppercase; tracking-wide: 1px;">Biodata Profil</h3>
-                    </div>
-                    
-                    <form action="" method="POST">
-                        <input type="hidden" name="action" value="update_profile">
-                        
-                        <!-- Input Username -->
-                        <div class="ft-form-group">
-                            <label for="username" class="ft-label">Username</label>
-                            <input 
-                                type="text" 
-                                id="username" 
-                                name="username" 
-                                class="ft-input" 
-                                value="<?php echo htmlspecialchars($current_username); ?>" 
-                                required
-                                placeholder="Masukkan username baru"
-                            >
-                            <div class="ft-input-desc">Digunakan untuk masuk ke akun Anda.</div>
-                        </div>
-                        
-                        <!-- Input Email -->
-                        <div class="ft-form-group">
-                            <label for="email" class="ft-label">Alamat Email</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                class="ft-input" 
-                                value="<?php echo htmlspecialchars($current_email); ?>" 
-                                required
-                                placeholder="nama@email.com"
-                            >
-                            <div class="ft-input-desc">Pastikan email aktif untuk kebutuhan verifikasi.</div>
-                        </div>
-                        
-                        <!-- Input No HP -->
-                        <div class="ft-form-group">
-                            <label for="phone" class="ft-label">Nomor WhatsApp / HP</label>
-                            <input 
-                                type="text" 
-                                id="phone" 
-                                name="phone" 
-                                class="ft-input" 
-                                value="<?php echo htmlspecialchars($current_phone); ?>" 
-                                required
-                                placeholder="Contoh: 081234567890"
-                            >
-                            <div class="ft-input-desc">Nomor handphone yang dapat dihubungi.</div>
-                        </div>
-                        
-                        <!-- Tombol Simpan Perubahan -->
-                        <div style="margin-top: 32px;">
-                            <button type="submit" class="ft-btn ft-btn-primary">
-                                Simpan Perubahan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Right Side: Form 2 - Keamanan / Ganti Password -->
-                <div class="ft-card">
-                    <div style="border-bottom: 1px solid var(--ft-border); padding-bottom: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fcd535" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                        <h3 style="margin: 0; font-size: 18px; font-weight: 700; text-transform: uppercase; tracking-wide: 1px;">Keamanan / Password</h3>
-                    </div>
-                    
-                    <form action="" method="POST">
-                        <input type="hidden" name="action" value="update_password">
-                        
-                        <!-- Input Password Lama -->
-                        <div class="ft-form-group">
-                            <label for="old_password" class="ft-label">Password Lama</label>
-                            <input 
-                                type="password" 
-                                id="old_password" 
-                                name="old_password" 
-                                class="ft-input" 
-                                required
-                                placeholder="Masukkan password saat ini"
-                            >
-                        </div>
-                        
-                        <!-- Input Password Baru -->
-                        <div class="ft-form-group">
-                            <label for="new_password" class="ft-label">Password Baru</label>
-                            <input 
-                                type="password" 
-                                id="new_password" 
-                                name="new_password" 
-                                class="ft-input" 
-                                required
-                                placeholder="Minimal 6 karakter"
-                            >
-                        </div>
-                        
-                        <!-- Input Konfirmasi Password Baru -->
-                        <div class="ft-form-group">
-                            <label for="confirm_password" class="ft-label">Konfirmasi Password Baru</label>
-                            <input 
-                                type="password" 
-                                id="confirm_password" 
-                                name="confirm_password" 
-                                class="ft-input" 
-                                required
-                                placeholder="Ulangi password baru"
-                            >
-                        </div>
-                        
-                        <!-- Tombol Perbarui Password -->
-                        <div style="margin-top: 32px;">
-                            <button type="submit" class="ft-btn ft-btn-secondary" style="width: 100%; border: 1px solid var(--ft-yellow); color: var(--ft-yellow); background: transparent;">
-                                Perbarui Password
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-            </div>
-            
-        </main>
-        
+  <!-- Avatar + info -->
+  <div class="ft-card" style="padding:1.5rem;display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem;">
+    <div class="ft-profile-avatar" style="width:70px;height:70px;font-size:1.8rem;"><?=$avatar_char?></div>
+    <div>
+      <p style="font-size:1.1rem;font-weight:800;color:#fff; margin:0;"><?=htmlspecialchars($user['username']??'')?></p>
+      <span class="ft-member-badge"><?=htmlspecialchars($_SESSION['level']??'Member')?></span>
+      <p style="font-size:0.78rem;color:#777;margin-top:6px; margin-bottom:0;">Bergabung sejak <?=date('d M Y', strtotime($user['created_at']??$user['tanggal_daftar']??'now'))?></p>
     </div>
+  </div>
 
-    <!-- Script auto fade out alert after 5 seconds for luxury UX -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                const successAlert = document.getElementById('alert-success');
-                const errorAlert = document.getElementById('alert-error');
-                if (successAlert) {
-                    successAlert.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-                    successAlert.style.opacity = '0';
-                    successAlert.style.transform = 'translateY(-10px)';
-                    setTimeout(() => successAlert.remove(), 500);
-                }
-                if (errorAlert) {
-                    errorAlert.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-                    errorAlert.style.opacity = '0';
-                    errorAlert.style.transform = 'translateY(-10px)';
-                    setTimeout(() => errorAlert.remove(), 500);
-                }
-            }, 5000);
-        });
-    </script>
-</body>
-</html>
+  <!-- Form Edit Profil -->
+  <div class="ft-card" style="padding:1.5rem;margin-bottom:1rem;">
+    <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">✏ Edit Informasi Profil</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="update_profil">
+      <div class="ft-form-grid">
+        <div class="ft-form-group">
+          <label class="ft-label">Username</label>
+          <input type="text" name="username" class="ft-input" required value="<?=htmlspecialchars($user['username']??'')?>">
+        </div>
+        <div class="ft-form-group">
+          <label class="ft-label">Email</label>
+          <input type="email" name="email" class="ft-input" required value="<?=htmlspecialchars($user['email']??'')?>">
+        </div>
+        <div class="ft-form-group">
+          <label class="ft-label">No. HP / WhatsApp</label>
+          <input type="tel" name="phone" class="ft-input" value="<?=htmlspecialchars($user[$db_phone_col]??'')?>">
+        </div>
+      </div>
+      <button type="submit" class="ft-btn ft-btn-primary" style="margin-top:1rem;">Simpan Perubahan</button>
+    </form>
+  </div>
+
+  <!-- Form Ganti Password -->
+  <div class="ft-card" style="padding:1.5rem;">
+    <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">🔒 Ganti Password</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="ganti_password">
+      <div class="ft-form-grid">
+        <div class="ft-form-group">
+          <label class="ft-label">Password Lama</label>
+          <input type="password" name="pw_lama" class="ft-input" required placeholder="••••••••">
+        </div>
+        <div class="ft-form-group">
+          <label class="ft-label">Password Baru (min. 6 karakter)</label>
+          <input type="password" name="pw_baru" class="ft-input" required placeholder="••••••••">
+        </div>
+        <div class="ft-form-group">
+          <label class="ft-label">Konfirmasi Password Baru</label>
+          <input type="password" name="pw_konfirm" class="ft-input" required placeholder="••••••••">
+        </div>
+      </div>
+      <button type="submit" class="ft-btn ft-btn-primary" style="margin-top:1rem;">Ubah Password</button>
+    </form>
+  </div>
+
+</main>
+</div>
+
+<script>
+// Auto remove alert messages after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const sukses = document.getElementById('alert-sukses');
+        const error = document.getElementById('alert-error');
+        if (sukses) {
+            sukses.style.transition = 'opacity 0.5s ease';
+            sukses.style.opacity = '0';
+            setTimeout(() => sukses.remove(), 500);
+        }
+        if (error) {
+            error.style.transition = 'opacity 0.5s ease';
+            error.style.opacity = '0';
+            setTimeout(() => error.remove(), 500);
+        }
+    }, 5000);
+});
+</script>
+
+<?php
+require_once '../../includes/footer.php';
+?>
