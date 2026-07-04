@@ -2,7 +2,9 @@
 let selectedProduct = null;
 let selectedPayment = null;
 
-const idInput = document.getElementById('id_game_user');
+const idInput = document.getElementById('id_game_user');           // hidden proxy
+const visibleId = document.getElementById('visible_id_game_user'); // the visible input the user types into
+const serverId = document.getElementById('server_game_user');      // optional server field
 const productCards = document.querySelectorAll('.product-card');
 const paymentCards = document.querySelectorAll('.payment-card');
 
@@ -12,45 +14,144 @@ const summaryPayment = document.getElementById('summary-payment');
 const summaryTotal = document.getElementById('summary-total');
 const btnSubmit = document.getElementById('btn-submit');
 
+// ─── Helper: is account data filled? ─────────────────────────────
+function isAccountFilled() {
+    // Check the visible ID field (the one the user actually types into)
+    if (visibleId) return visibleId.value.trim().length > 0;
+    // Fallback to hidden input
+    if (idInput) return idInput.value.trim().length > 0;
+    return false;
+}
+
+// ─── Toast Notification System ────────────────────────────────────
+function showToast(message, type) {
+    // type: 'error' | 'success' | 'warning'
+    const existing = document.getElementById('topup-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'topup-toast';
+    toast.className = 'topup-toast topup-toast--' + (type || 'error');
+
+    const iconSvg = {
+        error:   '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        success: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        warning: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+    };
+
+    toast.innerHTML =
+        '<span class="topup-toast-icon">' + (iconSvg[type] || iconSvg.error) + '</span>' +
+        '<span class="topup-toast-msg">' + message + '</span>';
+
+    document.body.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(function() {
+        toast.classList.add('topup-toast--visible');
+    });
+
+    // Auto-dismiss after 3.5s
+    setTimeout(function() {
+        toast.classList.remove('topup-toast--visible');
+        toast.classList.add('topup-toast--hiding');
+        setTimeout(function() { toast.remove(); }, 400);
+    }, 3500);
+}
+
+// ─── Inject toast CSS ─────────────────────────────────────────────
+(function injectToastStyles() {
+    if (document.getElementById('topup-toast-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'topup-toast-styles';
+    s.textContent =
+        '.topup-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;box-shadow:0 8px 30px rgba(0,0,0,.35);pointer-events:none;transition:opacity .35s ease,transform .35s cubic-bezier(.4,0,.2,1);max-width:90vw;white-space:nowrap}' +
+        '.topup-toast--visible{opacity:1;transform:translateX(-50%) translateY(0)}' +
+        '.topup-toast--hiding{opacity:0;transform:translateX(-50%) translateY(20px)}' +
+        '.topup-toast--error{background:#1e1e1e;color:#f1f1f1;border:1px solid #333}' +
+        '.topup-toast--error .topup-toast-icon{color:#ef4444}' +
+        '.topup-toast--success{background:#1e1e1e;color:#f1f1f1;border:1px solid #333}' +
+        '.topup-toast--success .topup-toast-icon{color:#22c55e}' +
+        '.topup-toast--warning{background:#1e1e1e;color:#f1f1f1;border:1px solid #333}' +
+        '.topup-toast--warning .topup-toast-icon{color:#f59e0b}' +
+        '.topup-toast-icon{display:flex;align-items:center;flex-shrink:0}' +
+        '.topup-toast-msg{line-height:1.3}';
+    document.head.appendChild(s);
+})();
+
+// ─── ID Input listeners ──────────────────────────────────────────
 if (idInput) {
     idInput.addEventListener('input', function() {
-        const idVal = this.value.trim();
+        var idVal = this.value.trim();
         summaryId.textContent = idVal ? idVal : '-';
         validateForm();
     });
-    idInput.addEventListener('focus', function() {
+}
+if (visibleId) {
+    visibleId.addEventListener('focus', function() {
         this.style.borderColor = 'var(--primary-color)';
     });
-    idInput.addEventListener('blur', function() {
+    visibleId.addEventListener('blur', function() {
         this.style.borderColor = 'var(--card-border)';
     });
 }
 
-productCards.forEach(card => {
+// ─── Product Card Click ──────────────────────────────────────────
+productCards.forEach(function(card) {
     card.addEventListener('click', function() {
-        productCards.forEach(c => c.classList.remove('selected'));
-        this.classList.add('selected');
+        // Block selection if account data is empty
+        if (!isAccountFilled()) {
+            showToast('Silahkan isi data akun terlebih dahulu.', 'error');
+            if (visibleId) {
+                visibleId.style.borderColor = '#ef4444';
+                visibleId.focus();
+                setTimeout(function() { visibleId.style.borderColor = 'var(--card-border)'; }, 2000);
+            }
+            return;
+        }
+
+        productCards.forEach(function(c) { c.classList.remove('selected'); });
+        card.classList.add('selected');
 
         selectedProduct = {
-            id: this.getAttribute('data-id'),
-            name: this.getAttribute('data-name'),
-            price: parseFloat(this.getAttribute('data-price'))
+            id:    card.getAttribute('data-id'),
+            name:  card.getAttribute('data-name'),
+            price: parseFloat(card.getAttribute('data-price'))
         };
 
         summaryProduct.textContent = selectedProduct.name;
-        summaryTotal.textContent = 'Rp ' + selectedProduct.price.toLocaleString('id-ID');
+        summaryTotal.textContent   = 'Rp ' + selectedProduct.price.toLocaleString('id-ID');
         validateForm();
+
+        // Auto-scroll ke card Verifikasi Pembelian
+        var verifyCard = document.getElementById('verification-card');
+        if (verifyCard) {
+            setTimeout(function() {
+                verifyCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 150);
+        }
     });
 });
 
-paymentCards.forEach(card => {
+// ─── Payment Card Click ──────────────────────────────────────────
+paymentCards.forEach(function(card) {
     card.addEventListener('click', function() {
-        paymentCards.forEach(c => c.classList.remove('selected'));
-        this.classList.add('selected');
+        // Block selection if account data is empty
+        if (!isAccountFilled()) {
+            showToast('Silahkan isi data akun terlebih dahulu.', 'error');
+            if (visibleId) {
+                visibleId.style.borderColor = '#ef4444';
+                visibleId.focus();
+                setTimeout(function() { visibleId.style.borderColor = 'var(--card-border)'; }, 2000);
+            }
+            return;
+        }
+
+        paymentCards.forEach(function(c) { c.classList.remove('selected'); });
+        card.classList.add('selected');
 
         selectedPayment = {
-            id: this.getAttribute('data-id'),
-            name: this.getAttribute('data-name')
+            id:   card.getAttribute('data-id'),
+            name: card.getAttribute('data-name')
         };
 
         summaryPayment.textContent = selectedPayment.name;
@@ -58,44 +159,45 @@ paymentCards.forEach(card => {
     });
 });
 
+// ─── Form Validation ─────────────────────────────────────────────
 function validateForm() {
-    const idVal = idInput ? idInput.value.trim() : '';
-    if (idVal && selectedProduct && selectedPayment) {
+    if (isAccountFilled() && selectedProduct && selectedPayment) {
         btnSubmit.removeAttribute('disabled');
     } else {
         btnSubmit.setAttribute('disabled', 'true');
     }
 }
 
-const checkoutModal = document.getElementById('checkout-modal');
-const modalClose = document.getElementById('modal-close');
+// ─── Checkout Modal ──────────────────────────────────────────────
+var checkoutModal = document.getElementById('checkout-modal');
+var modalClose    = document.getElementById('modal-close');
 
-const modalGame = document.getElementById('modal-game');
-const modalId = document.getElementById('modal-id');
-const modalProduct = document.getElementById('modal-product');
-const modalPayment = document.getElementById('modal-payment');
-const modalTotal = document.getElementById('modal-total');
+var modalGame    = document.getElementById('modal-game');
+var modalId      = document.getElementById('modal-id');
+var modalProduct = document.getElementById('modal-product');
+var modalPayment = document.getElementById('modal-payment');
+var modalTotal   = document.getElementById('modal-total');
 
 if (btnSubmit) {
     btnSubmit.addEventListener('click', function() {
-        modalGame.textContent = document.getElementById('summary-game').textContent;
-        modalId.textContent = idInput.value.trim();
+        modalGame.textContent    = document.getElementById('summary-game').textContent;
+        modalId.textContent      = idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : '-');
         modalProduct.textContent = selectedProduct.name;
         modalPayment.textContent = selectedPayment.name;
-        modalTotal.textContent = 'Rp ' + selectedProduct.price.toLocaleString('id-ID');
+        modalTotal.textContent   = 'Rp ' + selectedProduct.price.toLocaleString('id-ID');
 
-        const newOrder = {
-            id: Math.floor(Math.random() * 9000) + 1000,
-            date: new Date().toLocaleString('id-ID'),
-            game: modalGame.textContent,
-            product: selectedProduct.name,
-            targetId: idInput.value.trim(),
-            payment: selectedPayment.name,
-            price: selectedProduct.price,
-            status: 'pending'
+        var newOrder = {
+            id:       Math.floor(Math.random() * 9000) + 1000,
+            date:     new Date().toLocaleString('id-ID'),
+            game:     modalGame.textContent,
+            product:  selectedProduct.name,
+            targetId: idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : ''),
+            payment:  selectedPayment.name,
+            price:    selectedProduct.price,
+            status:   'pending'
         };
 
-        let orderHistory = JSON.parse(localStorage.getItem('order_history')) || [];
+        var orderHistory = JSON.parse(localStorage.getItem('order_history')) || [];
         orderHistory.unshift(newOrder);
         localStorage.setItem('order_history', JSON.stringify(orderHistory));
         checkoutModal.style.display = 'flex';
@@ -105,15 +207,17 @@ if (btnSubmit) {
 if (modalClose) {
     modalClose.addEventListener('click', function() {
         checkoutModal.style.display = 'none';
+        if (visibleId) visibleId.value = '';
+        if (serverId) serverId.value = '';
         if (idInput) idInput.value = '';
-        productCards.forEach(c => c.classList.remove('selected'));
-        paymentCards.forEach(c => c.classList.remove('selected'));
+        productCards.forEach(function(c) { c.classList.remove('selected'); });
+        paymentCards.forEach(function(c) { c.classList.remove('selected'); });
         selectedProduct = null;
         selectedPayment = null;
-        summaryId.textContent = '-';
+        summaryId.textContent      = '-';
         summaryProduct.textContent = '-';
         summaryPayment.textContent = '-';
-        summaryTotal.textContent = 'Rp 0';
+        summaryTotal.textContent   = 'Rp 0';
         btnSubmit.setAttribute('disabled', 'true');
     });
 }
