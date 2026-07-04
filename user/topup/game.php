@@ -232,7 +232,117 @@ if (!$db_connected || !$game) {
                     font-size: 1.1rem;
                   }
                 }
+
+                /* Custom Product Cards Style */
+                .product-options-grid {
+                  display: grid;
+                  grid-template-columns: repeat(3, 1fr);
+                  gap: 12px;
+                }
+
+                @media (max-width: 900px) {
+                  .product-options-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                  }
+                }
+
+                @media (max-width: 480px) {
+                  .product-options-grid {
+                    grid-template-columns: 1fr;
+                  }
+                }
+
+                .product-card {
+                  background-color: #1e2329 !important;
+                  border: 1.5px solid #2b3139 !important;
+                  border-radius: 8px !important;
+                  padding: 14px 12px !important;
+                  cursor: pointer;
+                  display: flex !important;
+                  flex-direction: column !important;
+                  align-items: flex-start !important;
+                  justify-content: space-between !important;
+                  min-height: 96px !important;
+                  position: relative !important;
+                  transition: all 0.2s ease !important;
+                  text-align: left !important;
+                }
+
+                .product-card .card-left-info {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 8px;
+                  width: 100%;
+                }
+
+                .product-card .product-name {
+                  font-size: 13px !important;
+                  font-weight: 700 !important;
+                  color: #fff !important;
+                  text-align: left !important;
+                  margin: 0 !important;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                }
+
+                .product-card .price-row {
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                }
+
+                .product-card .product-card-img {
+                  width: 18px;
+                  height: 18px;
+                  object-fit: contain;
+                  flex-shrink: 0;
+                }
+
+                .product-card .product-price {
+                  font-size: 13px !important;
+                  font-weight: 700 !important;
+                  color: #d97706 !important; /* brown/gold price as requested */
+                }
+
+                /* Instan badge at bottom right */
+                .product-card .instan-badge {
+                  position: absolute;
+                  bottom: 8px;
+                  right: 8px;
+                  background-color: #ffffff;
+                  color: #166534; /* dark green text */
+                  border: 1px solid #e5e7eb;
+                  border-radius: 4px;
+                  padding: 2px 6px;
+                  display: flex;
+                  align-items: center;
+                  gap: 3px;
+                  font-size: 8px;
+                  font-weight: 800;
+                  pointer-events: none;
+                  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+                }
+
+                .product-card .instan-icon {
+                  color: #10b981; /* Green lightning */
+                  fill: currentColor;
+                  flex-shrink: 0;
+                }
+
+                .product-card:hover {
+                  border-color: #FBBF24 !important;
+                  transform: translateY(-2px);
+                  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.15);
+                }
+
+                .product-card.selected {
+                  border-color: #FBBF24 !important;
+                  background-color: rgba(252, 213, 53, 0.04) !important;
+                  box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+                }
                 </style>
+
 
                 <div class="card game-info-card" style="padding: 0; overflow: hidden;">
                   <div class="funtopup-game-cover">
@@ -415,17 +525,97 @@ if (!$db_connected || !$game) {
                         <span class="topup-step-number">2</span>
                         <?php echo $current_lang === 'id' ? 'Pilih Nominal Pembelian' : 'Select Top Up Amount'; ?>
                     </h3>
-                    <div class="product-options-grid" id="product-options">
-                        <?php foreach ($produk_list as $prod): ?>
-                            <div class="product-card" data-id="<?php echo $prod['id']; ?>" data-name="<?php echo htmlspecialchars($prod['nama_produk']); ?>" data-price="<?php echo $prod['harga']; ?>">
-                                <span class="product-name"><?php echo htmlspecialchars($prod['nama_produk']); ?></span>
-                                <span class="product-price">Rp <?php echo number_format($prod['harga'], 0, ',', '.'); ?></span>
+                    
+                    <div id="product-options">
+                        <?php
+                        $memberships = [];
+                        $diamonds = [];
+                        foreach ($produk_list as $prod) {
+                            $name_lower = strtolower($prod['nama_produk']);
+                            // Filter out BP Card if it is present
+                            if (strpos($name_lower, 'bp card') !== false) {
+                                continue;
+                            }
+                            if (strpos($name_lower, 'member') !== false || strpos($name_lower, 'membership') !== false || strpos($name_lower, 'pass') !== false) {
+                                $memberships[] = $prod;
+                            } else {
+                                $diamonds[] = $prod;
+                            }
+                        }
+                        
+                        $game_slug = $game['slug'] ?? '';
+                        $is_diamond_game = ($game_slug === 'free-fire' || $game_slug === 'mobile-legends');
+                        ?>
+
+                        <!-- Membership Section -->
+                        <?php if (!empty($memberships)): ?>
+                            <h4 class="topup-subsection-title" style="margin-top: 15px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #fff; text-align: left;">Membership</h4>
+                            <div class="product-options-grid membership-grid" style="margin-bottom: 24px;">
+                                <?php foreach ($memberships as $prod): ?>
+                                    <?php
+                                    $img_name = 'ffmember.png';
+                                    if (strpos(strtolower($prod['nama_produk']), 'bulanan') !== false) {
+                                        $img_name = 'EPEPMMEBER.png';
+                                    }
+                                    $img_path = $base_url . "assets/images/" . $img_name;
+                                    ?>
+                                    <div class="product-card membership-card" data-id="<?php echo $prod['id']; ?>" data-name="<?php echo htmlspecialchars($prod['nama_produk']); ?>" data-price="<?php echo $prod['harga']; ?>">
+                                        <div class="card-left-info">
+                                            <span class="product-name"><?php echo htmlspecialchars($prod['nama_produk']); ?></span>
+                                            <div class="price-row">
+                                                <img src="<?php echo $img_path; ?>" class="product-card-img" alt="membership">
+                                                <span class="product-price">Rp <?php echo number_format($prod['harga'], 0, ',', '.'); ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="instan-badge">
+                                            <svg class="instan-icon" viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+                                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                                            </svg>
+                                            <span>Pengiriman INSTAN</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <!-- Diamonds Section -->
+                        <?php if (!empty($diamonds)): ?>
+                            <?php if (!empty($memberships)): ?>
+                                <h4 class="topup-subsection-title" style="margin-top: 15px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #fff; text-align: left;">Diamonds</h4>
+                            <?php endif; ?>
+                            <div class="product-options-grid diamonds-grid">
+                                <?php foreach ($diamonds as $prod): ?>
+                                    <?php
+                                    $img_path = '';
+                                    if ($is_diamond_game) {
+                                        $img_path = $base_url . "assets/images/diamondmlbb.png";
+                                    }
+                                    ?>
+                                    <div class="product-card diamond-card" data-id="<?php echo $prod['id']; ?>" data-name="<?php echo htmlspecialchars($prod['nama_produk']); ?>" data-price="<?php echo $prod['harga']; ?>">
+                                        <div class="card-left-info">
+                                            <span class="product-name"><?php echo htmlspecialchars($prod['nama_produk']); ?></span>
+                                            <div class="price-row">
+                                                <?php if (!empty($img_path)): ?>
+                                                    <img src="<?php echo $img_path; ?>" class="product-card-img" alt="diamond">
+                                                <?php endif; ?>
+                                                <span class="product-price">Rp <?php echo number_format($prod['harga'], 0, ',', '.'); ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="instan-badge">
+                                            <svg class="instan-icon" viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+                                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                                            </svg>
+                                            <span>Pengiriman INSTAN</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <div class="card receipt-summary-card">
+
+                <div class="card receipt-summary-card" id="verification-card">
                     <h3 class="receipt-summary-title">
                         <?php echo $current_lang === 'id' ? '4. Verifikasi Pembelian' : '4. Verification'; ?>
                     </h3>
