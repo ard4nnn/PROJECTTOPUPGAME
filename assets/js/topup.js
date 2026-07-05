@@ -1,6 +1,7 @@
 // Game Top Up Form Logic
 let selectedProduct = null;
 let selectedPayment = null;
+let purchaseQty = 1;
 
 const idInput = document.getElementById('id_game_user');           // hidden proxy
 const visibleId = document.getElementById('visible_id_game_user'); // the visible input the user types into
@@ -21,6 +22,22 @@ function isAccountFilled() {
     // Fallback to hidden input
     if (idInput) return idInput.value.trim().length > 0;
     return false;
+}
+
+// ─── Helper: calculate total with quantity ─────────────────────
+function calcTotal() {
+    if (!selectedProduct) return 0;
+    return selectedProduct.price * purchaseQty;
+}
+
+function formatRupiah(number) {
+    return 'Rp ' + number.toLocaleString('id-ID');
+}
+
+function updateSummaryTotal() {
+    if (summaryTotal) {
+        summaryTotal.textContent = formatRupiah(calcTotal());
+    }
 }
 
 // ─── Toast Notification System ────────────────────────────────────
@@ -118,8 +135,8 @@ productCards.forEach(function(card) {
             price: parseFloat(card.getAttribute('data-price'))
         };
 
-        summaryProduct.textContent = selectedProduct.name;
-        summaryTotal.textContent   = 'Rp ' + selectedProduct.price.toLocaleString('id-ID');
+        summaryProduct.textContent = selectedProduct.name + (purchaseQty > 1 ? ' x' + purchaseQty : '');
+        updateSummaryTotal();
         validateForm();
 
         // Auto-scroll ke card Verifikasi Pembelian
@@ -159,6 +176,53 @@ paymentCards.forEach(function(card) {
     });
 });
 
+// ─── Quantity Input Control ──────────────────────────────────────
+var qtyInput  = document.getElementById('qty-input');
+var qtyPlus   = document.getElementById('qty-plus');
+var qtyMinus  = document.getElementById('qty-minus');
+
+function applyQty(newQty) {
+    newQty = parseInt(newQty, 10);
+    if (isNaN(newQty) || newQty < 1) newQty = 1;
+    if (newQty > 99) newQty = 99;
+    purchaseQty = newQty;
+    if (qtyInput) qtyInput.value = purchaseQty;
+
+    // Update minus button visual state
+    if (qtyMinus) {
+        qtyMinus.style.opacity = purchaseQty <= 1 ? '0.4' : '1';
+        qtyMinus.style.cursor  = purchaseQty <= 1 ? 'not-allowed' : 'pointer';
+    }
+
+    // Reflect in summary
+    if (selectedProduct) {
+        summaryProduct.textContent = selectedProduct.name + (purchaseQty > 1 ? ' x' + purchaseQty : '');
+        updateSummaryTotal();
+    }
+}
+
+if (qtyPlus) {
+    qtyPlus.addEventListener('click', function() {
+        applyQty(purchaseQty + 1);
+    });
+}
+if (qtyMinus) {
+    qtyMinus.addEventListener('click', function() {
+        applyQty(purchaseQty - 1);
+    });
+}
+if (qtyInput) {
+    qtyInput.addEventListener('input', function() {
+        applyQty(this.value);
+    });
+    qtyInput.addEventListener('blur', function() {
+        applyQty(this.value);
+    });
+}
+
+// Initial state
+applyQty(1);
+
 // ─── Form Validation ─────────────────────────────────────────────
 function validateForm() {
     if (isAccountFilled() && selectedProduct && selectedPayment) {
@@ -180,20 +244,23 @@ var modalTotal   = document.getElementById('modal-total');
 
 if (btnSubmit) {
     btnSubmit.addEventListener('click', function() {
+        var productLabel = selectedProduct.name + (purchaseQty > 1 ? ' x' + purchaseQty : '');
+        var totalPrice   = calcTotal();
+
         modalGame.textContent    = document.getElementById('summary-game').textContent;
         modalId.textContent      = idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : '-');
-        modalProduct.textContent = selectedProduct.name;
+        modalProduct.textContent = productLabel;
         modalPayment.textContent = selectedPayment.name;
-        modalTotal.textContent   = 'Rp ' + selectedProduct.price.toLocaleString('id-ID');
+        modalTotal.textContent   = formatRupiah(totalPrice);
 
         var newOrder = {
             id:       Math.floor(Math.random() * 9000) + 1000,
             date:     new Date().toLocaleString('id-ID'),
             game:     modalGame.textContent,
-            product:  selectedProduct.name,
+            product:  productLabel,
             targetId: idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : ''),
             payment:  selectedPayment.name,
-            price:    selectedProduct.price,
+            price:    totalPrice,
             status:   'pending'
         };
 
@@ -214,6 +281,8 @@ if (modalClose) {
         paymentCards.forEach(function(c) { c.classList.remove('selected'); });
         selectedProduct = null;
         selectedPayment = null;
+        purchaseQty = 1;
+        applyQty(1);
         summaryId.textContent      = '-';
         summaryProduct.textContent = '-';
         summaryPayment.textContent = '-';
