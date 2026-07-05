@@ -299,6 +299,15 @@ if (!$db_connected || !$game) {
                   flex-shrink: 0;
                 }
 
+                /* Larger icon for PUBG UC & Elite Pass */
+                .product-card .product-card-img.pubg-img {
+                  width: 40px;
+                  height: 40px;
+                  object-fit: contain;
+                  flex-shrink: 0;
+                  border-radius: 6px;
+                }
+
                 .product-card .product-price {
                   font-size: 13px !important;
                   font-weight: 700 !important;
@@ -498,7 +507,7 @@ if (!$db_connected || !$game) {
 
                 <div class="card">
                     <h3 class="topup-step-title">
-                        <span class="topup-step-number">3</span>
+                        <span class="topup-step-number">4</span>
                         <?php echo __('metode'); ?>
                     </h3>
                     <div class="payment-options-list" id="payment-options">
@@ -536,7 +545,7 @@ if (!$db_connected || !$game) {
                             if (strpos($name_lower, 'bp card') !== false) {
                                 continue;
                             }
-                            if (strpos($name_lower, 'member') !== false || strpos($name_lower, 'membership') !== false || strpos($name_lower, 'pass') !== false) {
+                            if (strpos($name_lower, 'member') !== false || strpos($name_lower, 'membership') !== false || strpos($name_lower, 'pass') !== false || strpos($name_lower, 'elite') !== false) {
                                 $memberships[] = $prod;
                             } else {
                                 $diamonds[] = $prod;
@@ -545,17 +554,30 @@ if (!$db_connected || !$game) {
                         
                         $game_slug = $game['slug'] ?? '';
                         $is_diamond_game = ($game_slug === 'free-fire' || $game_slug === 'mobile-legends');
+                        $is_pubg = ($game_slug === 'pubg-mobile');
+                        $membership_section_label = $is_pubg ? 'Elite Pass' : 'Membership';
+                        $currency_section_label = $is_pubg ? 'UC' : ($is_diamond_game ? 'Diamonds' : 'Nominal');
                         ?>
 
-                        <!-- Membership Section -->
+                        <!-- Membership/Elite Pass Section -->
                         <?php if (!empty($memberships)): ?>
-                            <h4 class="topup-subsection-title" style="margin-top: 15px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #fff; text-align: left;">Membership</h4>
+                            <h4 class="topup-subsection-title" style="margin-top: 15px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #fff; text-align: left;"><?php echo $membership_section_label; ?></h4>
                             <div class="product-options-grid membership-grid" style="margin-bottom: 24px;">
                                 <?php foreach ($memberships as $prod): ?>
                                     <?php
                                     $img_name = 'ffmember.png';
-                                    if (strpos(strtolower($prod['nama_produk']), 'bulanan') !== false) {
-                                        $img_name = 'EPEPMMEBER.png';
+                                    if ($game_slug === 'mobile-legends') {
+                                        if (strpos(strtolower($prod['nama_produk']), 'weekly') !== false) {
+                                            $img_name = 'WDP ML.png';
+                                        } elseif (strpos(strtolower($prod['nama_produk']), 'twilight') !== false) {
+                                            $img_name = 'TWILIGHT PASS ML.jpg';
+                                        }
+                                    } elseif ($game_slug === 'pubg-mobile') {
+                                        $img_name = 'PUBG_ELITE_PASS.png'; // dedicated Elite Pass image
+                                    } else {
+                                        if (strpos(strtolower($prod['nama_produk']), 'bulanan') !== false) {
+                                            $img_name = 'EPEPMMEBER.png';
+                                        }
                                     }
                                     $img_path = $base_url . "assets/images/" . $img_name;
                                     ?>
@@ -563,7 +585,7 @@ if (!$db_connected || !$game) {
                                         <div class="card-left-info">
                                             <span class="product-name"><?php echo htmlspecialchars($prod['nama_produk']); ?></span>
                                             <div class="price-row">
-                                                <img src="<?php echo $img_path; ?>" class="product-card-img" alt="membership">
+                                                <img src="<?php echo $img_path; ?>" class="product-card-img<?php echo ($game_slug === 'pubg-mobile') ? ' pubg-img' : ''; ?>" alt="membership">
                                                 <span class="product-price">Rp <?php echo number_format($prod['harga'], 0, ',', '.'); ?></span>
                                             </div>
                                         </div>
@@ -578,16 +600,18 @@ if (!$db_connected || !$game) {
                             </div>
                         <?php endif; ?>
 
-                        <!-- Diamonds Section -->
+                        <!-- Diamonds/UC Section -->
                         <?php if (!empty($diamonds)): ?>
                             <?php if (!empty($memberships)): ?>
-                                <h4 class="topup-subsection-title" style="margin-top: 15px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #fff; text-align: left;">Diamonds</h4>
+                                <h4 class="topup-subsection-title" style="margin-top: 15px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #fff; text-align: left;"><?php echo $currency_section_label; ?></h4>
                             <?php endif; ?>
                             <div class="product-options-grid diamonds-grid">
                                 <?php foreach ($diamonds as $prod): ?>
                                     <?php
                                     $img_path = '';
-                                    if ($is_diamond_game) {
+                                    if ($is_pubg) {
+                                        $img_path = $base_url . "assets/images/UC PUBG.png"; // UC icon
+                                    } elseif ($is_diamond_game) {
                                         $img_path = $base_url . "assets/images/diamondmlbb.png";
                                     }
                                     ?>
@@ -596,7 +620,7 @@ if (!$db_connected || !$game) {
                                             <span class="product-name"><?php echo htmlspecialchars($prod['nama_produk']); ?></span>
                                             <div class="price-row">
                                                 <?php if (!empty($img_path)): ?>
-                                                    <img src="<?php echo $img_path; ?>" class="product-card-img" alt="diamond">
+                                                    <img src="<?php echo $img_path; ?>" class="product-card-img<?php echo $is_pubg ? ' pubg-img' : ''; ?>" alt="diamond">
                                                 <?php endif; ?>
                                                 <span class="product-price">Rp <?php echo number_format($prod['harga'], 0, ',', '.'); ?></span>
                                             </div>
@@ -614,10 +638,77 @@ if (!$db_connected || !$game) {
                     </div>
                 </div>
 
+                <!-- Quantity Input Section -->
+                <div class="card" id="quantity-card">
+                    <h3 class="topup-step-title">
+                        <span class="topup-step-number">3</span>
+                        <?php echo $current_lang === 'id' ? 'Masukkan Jumlah Pembelian' : 'Enter Purchase Quantity'; ?>
+                    </h3>
+                    <div class="topup-form-group">
+                        <style>
+                        .quantity-control-wrapper {
+                            display: flex;
+                            align-items: center;
+                            gap: 0;
+                            background: var(--card-bg, #1e2329);
+                            border: 1.5px solid var(--card-border, #2b3139);
+                            border-radius: 8px;
+                            overflow: hidden;
+                        }
+                        .quantity-control-input {
+                            flex: 1;
+                            background: transparent;
+                            border: none;
+                            outline: none;
+                            color: #fff;
+                            font-size: 15px;
+                            font-weight: 600;
+                            padding: 12px 16px;
+                            min-width: 0;
+                            text-align: left;
+                        }
+                        .quantity-control-input::-webkit-inner-spin-button,
+                        .quantity-control-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+                        .quantity-control-btn {
+                            flex-shrink: 0;
+                            width: 44px;
+                            height: 44px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background: #FBBF24;
+                            color: #1a1000;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 20px;
+                            font-weight: 700;
+                            transition: background 0.2s ease;
+                            line-height: 1;
+                            user-select: none;
+                        }
+                        .quantity-control-btn:hover { background: #f59e0b; }
+                        .quantity-control-btn:active { background: #d97706; }
+                        .quantity-control-btn.btn-minus { border-left: 1.5px solid var(--card-border, #2b3139); }
+                        </style>
+                        <div class="quantity-control-wrapper">
+                            <input
+                                type="number"
+                                id="qty-input"
+                                class="quantity-control-input topup-input"
+                                value="1"
+                                min="1"
+                                max="99"
+                                style="border:none; border-radius:0;"
+                            >
+                            <button type="button" class="quantity-control-btn btn-plus" id="qty-plus">+</button>
+                            <button type="button" class="quantity-control-btn btn-minus" id="qty-minus">&minus;</button>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card receipt-summary-card" id="verification-card">
                     <h3 class="receipt-summary-title">
-                        <?php echo $current_lang === 'id' ? '4. Verifikasi Pembelian' : '4. Verification'; ?>
+                        <?php echo $current_lang === 'id' ? '5. Verifikasi Pembelian' : '5. Verification'; ?>
                     </h3>
                     <p class="receipt-summary-desc">
                         <?php echo $current_lang === 'id' 
