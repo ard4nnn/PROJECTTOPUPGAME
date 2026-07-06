@@ -209,7 +209,7 @@ require_once '../../includes/header.php';
 
   <!-- Form Edit Profil -->
   <div class="ft-card" style="padding:1.5rem;margin-bottom:1rem;">
-    <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">✏ Edit Informasi Profil</h2>
+    <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">Edit Informasi Profil</h2>
     <form method="POST">
       <input type="hidden" name="action" value="update_profil">
       <div class="ft-form-grid">
@@ -232,7 +232,7 @@ require_once '../../includes/header.php';
 
   <!-- Form Ganti Password -->
   <div class="ft-card" style="padding:1.5rem;">
-    <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">🔒 Ganti Password</h2>
+    <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">Ganti Password</h2>
     <form method="POST">
       <input type="hidden" name="action" value="ganti_password">
       <div class="ft-form-grid">
