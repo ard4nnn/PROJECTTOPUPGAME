@@ -33,7 +33,6 @@ if (!empty($search_id)) {
 <div class="container tx-search-container">
     <div class="card">
         <div class="card-header-center">
-            <span class="center-icon">🔍</span>
             <h2 class="card-title-lg"><?php echo __('cek_title'); ?></h2>
             <p class="card-desc"><?php echo __('cek_desc'); ?></p>
         </div>
