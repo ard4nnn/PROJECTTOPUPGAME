@@ -176,7 +176,7 @@ require_once '../../includes/header.php';
           placeholder="No. Invoice, Item, User Input" value="<?=htmlspecialchars($search)?>">
       </div>
       <div class="ft-filter-actions">
-        <button type="submit" class="ft-btn ft-btn-primary">🔍 Cari</button>
+        <button type="submit" class="ft-btn ft-btn-primary">Cari</button>
         <a href="transaksi.php" class="ft-btn ft-btn-secondary">Reset</a>
         <select name="per_page" class="ft-select" id="filter-per-page" style="width:auto;" onchange="this.form.submit()">
           <?php foreach([10,25,50,100] as $n): ?>
