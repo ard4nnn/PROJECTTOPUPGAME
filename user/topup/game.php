@@ -72,13 +72,13 @@ if (!$db_connected || !$game) {
                     'mobile-legends' => 'MLBB.png',
                     'free-fire' => 'FREEFIRE.png',
                     'pubg-mobile' => 'PUBG.png',
-                    'genshin-impact' => 'Genshin Impact.jpg',
+                    'wuthering-waves' => 'Wuthering Waves.jpg',
                 ];
                 $dev_mapping = [
                     'mobile-legends' => 'Moonton',
                     'free-fire' => 'Garena',
                     'pubg-mobile' => 'Tencent Games',
-                    'genshin-impact' => 'miHoYo',
+                    'wuthering-waves' => 'Kuro Games',
                 ];
 
                 $game_slug = $game['slug'] ?? ($slug ?? 'default');
@@ -382,23 +382,19 @@ if (!$db_connected || !$game) {
 
                 <?php
                 $is_ml = ($game_slug === 'mobile-legends');
-                $is_genshin = ($game_slug === 'genshin-impact');
-                $needs_server = ($is_ml || $is_genshin);
+                $is_wuthering = ($game_slug === 'wuthering-waves');
+                $needs_server = ($is_ml || $is_wuthering);
 
-                $id_label = $is_genshin ? 'UID' : 'ID';
+                $id_label = 'ID';
                 
                 if ($current_lang === 'id') {
-                    $id_placeholder = $is_genshin ? 'Masukkan UID' : 'Masukkan ID';
-                    $server_placeholder = 'Masukkan Server';
-                    $hint_text = $is_genshin 
-                        ? 'Masukkan UID Game Anda dengan benar. Kami tidak bertanggung jawab atas kesalahan input UID.' 
-                        : 'Masukkan ID Game Anda dengan benar. Kami tidak bertanggung jawab atas kesalahan input ID.';
+                    $id_placeholder = 'Masukkan ID';
+                    $server_placeholder = 'Pilih Server';
+                    $hint_text = 'Masukkan ID Game Anda dengan benar. Kami tidak bertanggung jawab atas kesalahan input ID.';
                 } else {
-                    $id_placeholder = $is_genshin ? 'Enter UID' : 'Enter ID';
-                    $server_placeholder = 'Enter Server';
-                    $hint_text = $is_genshin 
-                        ? 'Ensure your Game UID is correct. We are not responsible for incorrect inputs.' 
-                        : 'Ensure your Game ID is correct. We are not responsible for incorrect inputs.';
+                    $id_placeholder = 'Enter ID';
+                    $server_placeholder = 'Select Server';
+                    $hint_text = 'Ensure your Game ID is correct. We are not responsible for incorrect inputs.';
                 }
                 ?>
 
@@ -449,7 +445,7 @@ if (!$db_connected || !$game) {
                     
                     <div class="topup-form-group">
                         <div class="funtopup-account-grid <?php echo $needs_server ? 'has-server' : ''; ?>">
-                            <!-- Visible ID/UID Field -->
+                            <!-- Visible ID Field -->
                             <div class="funtopup-input-wrapper">
                                 <label for="visible_id_game_user" class="topup-label funtopup-label-with-icon">
                                     <?php echo $id_label; ?>
@@ -459,10 +455,22 @@ if (!$db_connected || !$game) {
                             </div>
 
                             <?php if ($needs_server): ?>
-                                <!-- Visible Server Field -->
+                                <!-- Server Field -->
                                 <div class="funtopup-input-wrapper">
                                     <label for="server_game_user" class="topup-label">Server</label>
-                                    <input type="text" id="server_game_user" placeholder="<?php echo $server_placeholder; ?>" class="topup-input">
+                                    <?php if ($is_wuthering): ?>
+                                        <!-- Dropdown server khusus Wuthering Waves -->
+                                        <select id="server_game_user" class="topup-input" style="appearance:none; -webkit-appearance:none; cursor:pointer; background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23aaa'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E\"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px;">
+                                            <option value="" disabled selected><?php echo $server_placeholder; ?></option>
+                                            <option value="America">America</option>
+                                            <option value="Asia">Asia</option>
+                                            <option value="Europe">Europe</option>
+                                            <option value="TW_HK_MO">TW_HK_MO</option>
+                                            <option value="SEA">SEA</option>
+                                        </select>
+                                    <?php else: ?>
+                                        <input type="text" id="server_game_user" placeholder="<?php echo $server_placeholder; ?>" class="topup-input">
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -473,6 +481,11 @@ if (!$db_connected || !$game) {
                         <small class="topup-hint" style="margin-top: 10px; display: block;">
                             <?php echo $hint_text; ?>
                         </small>
+                        <?php if ($is_wuthering): ?>
+                        <small style="display:block; margin-top:6px; color:#FBBF24; font-size:0.75rem;">
+                            Please make sure you fill the correct account data
+                        </small>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -500,6 +513,7 @@ if (!$db_connected || !$game) {
                         visibleIdInput.addEventListener('input', syncInput);
                         if (serverInput) {
                             serverInput.addEventListener('input', syncInput);
+                            serverInput.addEventListener('change', syncInput);
                         }
                     }
                 })();
@@ -545,7 +559,7 @@ if (!$db_connected || !$game) {
                             if (strpos($name_lower, 'bp card') !== false) {
                                 continue;
                             }
-                            if (strpos($name_lower, 'member') !== false || strpos($name_lower, 'membership') !== false || strpos($name_lower, 'pass') !== false || strpos($name_lower, 'elite') !== false) {
+                            if (strpos($name_lower, 'member') !== false || strpos($name_lower, 'membership') !== false || strpos($name_lower, 'pass') !== false || strpos($name_lower, 'elite') !== false || strpos($name_lower, 'subscription') !== false) {
                                 $memberships[] = $prod;
                             } else {
                                 $diamonds[] = $prod;
@@ -555,8 +569,9 @@ if (!$db_connected || !$game) {
                         $game_slug = $game['slug'] ?? '';
                         $is_diamond_game = ($game_slug === 'free-fire' || $game_slug === 'mobile-legends');
                         $is_pubg = ($game_slug === 'pubg-mobile');
-                        $membership_section_label = $is_pubg ? 'Elite Pass' : 'Membership';
-                        $currency_section_label = $is_pubg ? 'UC' : ($is_diamond_game ? 'Diamonds' : 'Nominal');
+                        $is_ww = ($game_slug === 'wuthering-waves');
+                        $membership_section_label = $is_pubg ? 'Elite Pass' : ($is_ww ? 'Lunite Subscription' : 'Membership');
+                        $currency_section_label = $is_pubg ? 'UC' : ($is_diamond_game ? 'Diamonds' : ($is_ww ? 'Lunites' : 'Nominal'));
                         ?>
 
                         <!-- Membership/Elite Pass Section -->
@@ -573,7 +588,9 @@ if (!$db_connected || !$game) {
                                             $img_name = 'TWILIGHT PASS ML.jpg';
                                         }
                                     } elseif ($game_slug === 'pubg-mobile') {
-                                        $img_name = 'PUBG_ELITE_PASS.png'; // dedicated Elite Pass image
+                                        $img_name = 'PUBG_ELITE_PASS.png';
+                                    } elseif ($game_slug === 'wuthering-waves') {
+                                        $img_name = 'LUNITE SUBSCRIPTION WUTHERING WAVES.png';
                                     } else {
                                         if (strpos(strtolower($prod['nama_produk']), 'bulanan') !== false) {
                                             $img_name = 'EPEPMMEBER.png';
@@ -610,7 +627,9 @@ if (!$db_connected || !$game) {
                                     <?php
                                     $img_path = '';
                                     if ($is_pubg) {
-                                        $img_path = $base_url . "assets/images/UC PUBG.png"; // UC icon
+                                        $img_path = $base_url . "assets/images/UC PUBG.png";
+                                    } elseif ($is_ww) {
+                                        $img_path = $base_url . "assets/images/LUNITE_WUTHERING_WAVES-removebg-preview.png";
                                     } elseif ($is_diamond_game) {
                                         $img_path = $base_url . "assets/images/diamondmlbb.png";
                                     }
