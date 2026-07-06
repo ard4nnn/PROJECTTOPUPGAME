@@ -17,24 +17,24 @@ $avatar_char = strtoupper(substr($s_username, 0, 1));
   </div>
   <nav style="flex:1; display: flex; flex-direction: column;">
     <a href="index.php" class="ft-nav-item <?= $current_page==='index' ? 'active' : '' ?>">
-      <span class="ft-nav-icon">⊞</span> Dashboard
+      <span class="ft-nav-icon"><img src="../../assets/images/icons8-dashboard-layout-24.png" alt="Dashboard" style="width:20px;height:20px;object-fit:contain;"></span> Dashboard
     </a>
     <a href="transaksi.php" class="ft-nav-item <?= $current_page==='transaksi' ? 'active' : '' ?>">
-      <span class="ft-nav-icon">📋</span> Transaksi
+      <span class="ft-nav-icon"><img src="../../assets/images/icons8-transaction-30.png" alt="Transaksi" style="width:20px;height:20px;object-fit:contain;"></span> Transaksi
     </a>
     <a href="profil.php" class="ft-nav-item <?= $current_page==='profil' ? 'active' : '' ?>">
-      <span class="ft-nav-icon">👤</span> Profil Saya
+      <span class="ft-nav-icon"><img src="../../assets/images/icons8-profile-24.png" alt="Profil" style="width:20px;height:20px;object-fit:contain;"></span> Profil Saya
     </a>
     <!-- Tautan Kembali Ke Beranda Utama -->
     <a href="../../index.php" class="ft-nav-item">
-      <span class="ft-nav-icon">🏠</span> Ke Beranda
+      <span class="ft-nav-icon"><img src="../../assets/images/icons8-home-button-24.png" alt="Home" style="width:20px;height:20px;object-fit:contain;"></span> Ke Beranda
     </a>
   </nav>
   <div class="ft-nav-keluar">
     <!-- SESUAIKAN path logout dengan yang ada di project ini -->
     <a href="../auth/logout.php" class="ft-nav-item"
        onclick="return confirm('Yakin ingin keluar?')">
-      <span class="ft-nav-icon">🚪</span> Keluar
+      <span class="ft-nav-icon"><img src="../../assets/images/icons8-home-button-24.png" alt="Keluar" style="width:20px;height:20px;object-fit:contain;"></span> Keluar
     </a>
   </div>
 </aside>
