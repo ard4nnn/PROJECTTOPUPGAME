@@ -26,9 +26,9 @@ return [
         ],
         [
             'id' => 4,
-            'nama_game' => 'Genshin Impact',
-            'slug' => 'genshin-impact',
-            'deskripsi' => 'Top up Genesis Crystals Genshin Impact untuk gacha karakter impianmu.',
+            'nama_game' => 'Wuthering Waves',
+            'slug' => 'wuthering-waves',
+            'deskripsi' => 'Top up Lunites Wuthering Waves untuk gacha karakter impianmu.',
             'status' => 'aktif'
         ]
     ],
@@ -203,13 +203,21 @@ return [
             ]
         ],
 
-        'genshin-impact' => [
+        'wuthering-waves' => [
             'id' => 4,
-            'nama_game' => 'Genshin Impact',
-            'deskripsi' => 'Top up Genesis Crystals Genshin Impact untuk gacha karakter impianmu.',
+            'nama_game' => 'Wuthering Waves',
+            'deskripsi' => 'Top up Lunites Wuthering Waves untuk gacha karakter impianmu.',
             'produk' => [
-                ['id' => 10, 'nama_produk' => '60 Genesis Crystals', 'harga' => 16000],
-                ['id' => 11, 'nama_produk' => '300 Genesis Crystals', 'harga' => 79000]
+                // Lunite Subscription (kategori terpisah)
+                ['id' => 400, 'nama_produk' => 'Lunite Subscription', 'harga' => 77513],
+
+                // Lunites Top Up
+                ['id' => 401, 'nama_produk' => '60 Lunites', 'harga' => 15267],
+                ['id' => 402, 'nama_produk' => '300 + 30 Lunites', 'harga' => 76505],
+                ['id' => 403, 'nama_produk' => '980 + 110 Lunites', 'harga' => 234116],
+                ['id' => 404, 'nama_produk' => '1980 + 260 Lunites', 'harga' => 464857],
+                ['id' => 405, 'nama_produk' => '3280 + 600 Lunites', 'harga' => 767700],
+                ['id' => 406, 'nama_produk' => '6480 + 1600 Lunites', 'harga' => 1484052]
             ]
         ]
     ],
