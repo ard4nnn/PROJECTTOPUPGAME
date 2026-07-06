@@ -283,9 +283,9 @@ $flash_sale_items = $flashsale_data['items'];
             'image' => $base_url . 'assets/images/PUBG.png',
             'color' => '40 85% 35%',
         ],
-        'genshin-impact' => [
-            'image' => $base_url . 'assets/images/Genshin Impact.jpg',
-            'color' => '175 75% 25%',
+        'wuthering-waves' => [
+            'image' => $base_url . 'assets/images/Wuthering Waves.jpg',
+            'color' => '195 80% 30%',
         ],
     ];
     ?>
