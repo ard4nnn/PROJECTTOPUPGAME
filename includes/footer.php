@@ -35,9 +35,8 @@
             <div class="footer-links-col">
                 <h3><?php echo $current_lang === 'id' ? 'Perusahaan' : 'Company'; ?></h3>
                 <ul>
-                    <li><a href="#about"><?php echo $current_lang === 'id' ? 'Tentang Kami' : 'About Us'; ?></a></li>
                     <li><a href="<?php echo $base_url; ?>kebijakan-privasi.php"><?php echo $current_lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'; ?></a></li>
-                    <li><a href="#terms"><?php echo $current_lang === 'id' ? 'Syarat & Ketentuan' : 'Terms & Conditions'; ?></a></li>
+                    <li><a href="<?php echo $base_url; ?>syarat-ketentuan.php"><?php echo $current_lang === 'id' ? 'Syarat & Ketentuan' : 'Terms & Conditions'; ?></a></li>
                 </ul>
             </div>
             <!-- Ikuti Kami -->
