@@ -786,6 +786,7 @@ if (!$db_connected || !$game) {
             <div class="checkout-modal-receipt-header">
                 <?php echo __('tx_detail'); ?>:
             </div>
+            <div class="checkout-modal-receipt-row"><span>No. Invoice:</span><span id="modal-invoice-id" style="font-weight:700; color: var(--primary-color); font-family: monospace;">-</span></div>
             <div class="checkout-modal-receipt-row"><span><?php echo __('game'); ?>:</span><span id="modal-game" style="font-weight:600;">-</span></div>
             <div class="checkout-modal-receipt-row"><span><?php echo __('target_id'); ?>:</span><span id="modal-id" style="font-weight:600;">-</span></div>
             <div class="checkout-modal-receipt-row"><span><?php echo __('produk'); ?>:</span><span id="modal-product" style="font-weight:600;">-</span></div>
@@ -802,6 +803,13 @@ if (!$db_connected || !$game) {
     </div>
 </div>
 
+<script>
+    // Inject PHP variables into JS scope for topup.js
+    window._topupConfig = {
+        processUrl: '<?php echo $base_url; ?>user/topup/process.php',
+        baseUrl:    '<?php echo $base_url; ?>'
+    };
+</script>
 <script src="<?php echo $base_url; ?>assets/js/topup.js"></script>
 
 <?php require_once '../../includes/footer.php'; ?>
