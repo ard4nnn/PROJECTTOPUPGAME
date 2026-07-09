@@ -3,7 +3,7 @@ const gamesList = [
     { name: 'Mobile Legends', slug: 'mobile-legends', desc: 'Top up Diamond instant' },
     { name: 'Free Fire', slug: 'free-fire', desc: 'Top up Diamond cheap' },
     { name: 'PUBG Mobile', slug: 'pubg-mobile', desc: 'Top up UC global' },
-    { name: 'Genshin Impact', slug: 'genshin-impact', desc: 'Top up Genesis Crystals' }
+    { name: 'Wuthering Waves', slug: 'wuthering-waves', desc: 'Top up Lunites' }
 ];
 
 const headerSearch = document.getElementById('header-search');
@@ -36,7 +36,7 @@ if (headerSearch && searchSuggest) {
                     'mobile-legends': 'MLBB.png',
                     'free-fire': 'FREEFIRE.png',
                     'pubg-mobile': 'PUBG.png',
-                    'genshin-impact': 'Genshin Impact.jpg'
+                    'wuthering-waves': 'Wuthering Waves.jpg'
                 };
                 
                 let bannerContent = `<div class="suggest-banner">${initials}</div>`;
