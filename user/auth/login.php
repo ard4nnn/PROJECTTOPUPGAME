@@ -17,6 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = 'Harap isi semua field!';
     } else {
+        // Flag: true hanya jika DB hidup tapi kredensial salah (TIDAK boleh fallback ke demo)
+        $auth_failed_with_live_db = false;
+
         if ($db_connected && $pdo) {
             try {
                 $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
@@ -24,20 +27,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user = $stmt->fetch();
 
                 if ($user && password_verify($password, $user['password'])) {
+                    // Login sukses — set session dan redirect
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['saldo'] = $user['saldo'];
                     echo "<script>window.location.href = '" . $base_url . "';</script>";
                     exit;
                 } else {
+                    // DB hidup, tapi kredensial salah — JANGAN fallback ke demo
                     $error = 'Username atau password salah!';
+                    $auth_failed_with_live_db = true;
                 }
             } catch (PDOException $e) {
+                // DB hidup tapi error saat query — boleh fallback ke demo
                 $error = 'Koneksi database bermasalah. Menggunakan Mode Demo.';
+                $db_connected = false; // tandai agar kondisi fallback di bawah terpicu
             }
         }
-        
-        if (!$db_connected || !empty($error)) {
+
+        // Fallback demo HANYA jika DB benar-benar tidak bisa dipakai,
+        // BUKAN saat DB hidup tapi kredensial salah.
+        if (!$db_connected && !$auth_failed_with_live_db) {
             $_SESSION['user_id'] = 999;
             $_SESSION['username'] = htmlspecialchars($username);
             $_SESSION['saldo'] = 75000.00;
