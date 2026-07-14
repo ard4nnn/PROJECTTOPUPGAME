@@ -225,6 +225,7 @@ return [
         ['id' => 1, 'nama' => 'DANA', 'kode' => 'DANA'],
         ['id' => 2, 'nama' => 'GoPay', 'kode' => 'GOPAY'],
         ['id' => 3, 'nama' => 'OVO', 'kode' => 'OVO'],
-        ['id' => 4, 'nama' => 'Transfer Bank BCA', 'kode' => 'BCA']
+        ['id' => 4, 'nama' => 'Transfer Bank BCA', 'kode' => 'BCA'],
+        ['id' => 5, 'nama' => 'QRIS', 'kode' => 'QRIS']
     ]
 ];
