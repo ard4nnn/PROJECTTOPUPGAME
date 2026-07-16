@@ -68,9 +68,9 @@ $flash_sale_items = $flashsale_data['items'];
                             <span class="ticket-discount">DISKON Rp 2.000</span>
                             <span class="ticket-min">*MIN. PEMBELIAN 20K</span>
                         </div>
-                        <div class="ticket" onclick="copyPromoCode('JUNIBERKAH2026')">
+                        <div class="ticket" onclick="copyPromoCode('FUNBERKAH2026')">
                             <span class="ticket-label"><?php echo __('promo_code'); ?> :</span>
-                            <span class="ticket-code">JUNIBERKAH2026</span>
+                            <span class="ticket-code">FUNBERKAH2026</span>
                             <span class="ticket-discount">DISKON Rp 5.000</span>
                             <span class="ticket-min">*MIN. PEMBELIAN 50K</span>
                         </div>
