@@ -27,11 +27,9 @@ header('Content-Type: application/json; charset=utf-8');
 
 // ─── Cek koneksi DB ───────────────────────────────────────────────
 if (!$db_connected || !$pdo) {
-    // DB offline — beri tahu JS agar fallback ke demo/localStorage
     echo json_encode([
         'success'    => false,
-        'db_offline' => true,
-        'message'    => 'Database tidak tersedia. Menggunakan mode demo.'
+        'message'    => __('layanan_gangguan_checkout')
     ]);
     exit;
 }
@@ -92,18 +90,14 @@ try {
     }
 
     // ─── Validasi user_id ada di tabel users ─────────────────────
-    // (mempertahankan integritas FK — penting untuk akun demo user_id=999)
     $stmtUser = $pdo->prepare("SELECT id FROM users WHERE id = ?");
     $stmtUser->execute([$user_id]);
     $userRow = $stmtUser->fetch();
 
     if (!$userRow) {
-        // Bisa terjadi di mode demo (user_id=999 tidak ada di DB)
-        // Perlakukan seperti DB offline → fallback ke demo localStorage
         echo json_encode([
             'success'    => false,
-            'db_offline' => true,
-            'message'    => 'Akun demo tidak bisa menyimpan transaksi ke database. Menggunakan mode demo.'
+            'message'    => 'Akun Anda tidak valid.'
         ]);
         exit;
     }
@@ -135,11 +129,9 @@ try {
     exit;
 
 } catch (PDOException $e) {
-    // Error DB saat proses — fallback ke demo
     echo json_encode([
         'success'    => false,
-        'db_offline' => true,
-        'message'    => 'Kesalahan database saat memproses transaksi. Menggunakan mode demo.'
+        'message'    => __('layanan_gangguan_checkout')
     ]);
     exit;
 }

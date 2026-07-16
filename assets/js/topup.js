@@ -248,35 +248,6 @@ if (btnSubmit) {
         var productLabel = selectedProduct.name + (purchaseQty > 1 ? ' x' + purchaseQty : '');
         var totalPrice   = calcTotal();
 
-        function handleDemoFallback() {
-            var randomId = Math.floor(Math.random() * 9000) + 1000;
-
-            modalGame.textContent    = document.getElementById('summary-game').textContent;
-            modalId.textContent      = idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : '-');
-            modalProduct.textContent = productLabel;
-            modalPayment.textContent = selectedPayment.name;
-            modalTotal.textContent   = formatRupiah(totalPrice);
-            if (modalInvoice) {
-                modalInvoice.textContent = '#' + randomId + ' (Demo)';
-            }
-
-            var newOrder = {
-                id:       randomId,
-                date:     new Date().toLocaleString('id-ID'),
-                game:     modalGame.textContent,
-                product:  productLabel,
-                targetId: idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : ''),
-                payment:  selectedPayment.name,
-                price:    totalPrice,
-                status:   'pending'
-            };
-
-            var orderHistory = JSON.parse(localStorage.getItem('order_history')) || [];
-            orderHistory.unshift(newOrder);
-            localStorage.setItem('order_history', JSON.stringify(orderHistory));
-            checkoutModal.style.display = 'flex';
-        }
-
         // Cek apakah config backend tersedia
         if (window._topupConfig && window._topupConfig.processUrl) {
             btnSubmit.setAttribute('disabled', 'true');
@@ -316,9 +287,6 @@ if (btnSubmit) {
                         modalInvoice.textContent = '#' + data.invoice_id;
                     }
                     checkoutModal.style.display = 'flex';
-                } else if (data.db_offline) {
-                    // Fallback ke demo mode jika DB offline
-                    handleDemoFallback();
                 } else {
                     showToast(data.message || 'Gagal memproses transaksi.', 'error');
                 }
@@ -326,18 +294,10 @@ if (btnSubmit) {
             .catch(function(error) {
                 btnSubmit.removeAttribute('disabled');
                 btnSubmit.textContent = window.currentLang === 'id' ? 'Konfirmasi & Beli Sekarang' : 'Confirm & Buy Now';
-
-                // Jika error adalah masalah otentikasi/login (misal guest checkout ditolak)
-                if (error.message.includes('login') || error.message.includes('pembelian') || error.message.includes('autentikasi')) {
-                    showToast(error.message, 'error');
-                } else {
-                    // Masalah koneksi / DB offline -> Fallback ke demo mode
-                    handleDemoFallback();
-                }
+                showToast(error.message || (window.currentLang === 'id' ? 'Gagal menghubungi server.' : 'Failed to connect to server.'), 'error');
             });
         } else {
-            // Mode offline / fallback statis
-            handleDemoFallback();
+            showToast(window.currentLang === 'id' ? 'Layanan sedang mengalami gangguan, silakan coba lagi.' : 'Service is temporarily unavailable, please try again.', 'error');
         }
     });
 }
