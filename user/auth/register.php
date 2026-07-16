@@ -36,12 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $success = 'Pendaftaran berhasil! Silakan login.';
                 }
             } catch (PDOException $e) {
-                $error = 'Kesalahan database. Menggunakan Mode Demo.';
+                $error = __('layanan_gangguan_register');
+                $db_connected = false;
             }
         }
         
-        if (!$db_connected || !empty($error)) {
-            $success = 'Pendaftaran Akun Demo Berhasil! Silakan masuk dengan akun baru Anda.';
+        if (!$db_connected && empty($error)) {
+            $error = __('layanan_gangguan_register');
         }
     }
 }

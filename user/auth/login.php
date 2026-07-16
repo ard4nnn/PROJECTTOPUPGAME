@@ -39,20 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $auth_failed_with_live_db = true;
                 }
             } catch (PDOException $e) {
-                // DB hidup tapi error saat query — boleh fallback ke demo
-                $error = 'Koneksi database bermasalah. Menggunakan Mode Demo.';
-                $db_connected = false; // tandai agar kondisi fallback di bawah terpicu
+                // DB hidup tapi error saat query — tidak boleh login
+                $error = __('layanan_gangguan_login');
+                $db_connected = false; // tandai agar kondisi di bawah terpicu
             }
         }
 
-        // Fallback demo HANYA jika DB benar-benar tidak bisa dipakai,
-        // BUKAN saat DB hidup tapi kredensial salah.
+        // Gagal karena DB offline dan bukan karena salah kredensial
         if (!$db_connected && !$auth_failed_with_live_db) {
-            $_SESSION['user_id'] = 999;
-            $_SESSION['username'] = htmlspecialchars($username);
-            $_SESSION['saldo'] = 75000.00;
-            echo "<script>window.location.href = '" . $base_url . "';</script>";
-            exit;
+            $error = __('layanan_gangguan_login');
         }
     }
 }
@@ -232,9 +227,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </a>
     </div>
 
-    <div class="mt-4 p-3 bg-zinc-950/50 border border-zinc-800 rounded-lg text-[11px] text-zinc-500">
-      💡 <strong>Mode Demo Aktif:</strong> Jika XAMPP MySQL Anda mati, Anda dapat mengetikkan username dan password apa saja untuk langsung masuk ke mode demo.
-    </div>
   </div>
 </section>
 
