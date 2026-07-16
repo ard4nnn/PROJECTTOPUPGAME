@@ -126,9 +126,6 @@ require_once '../../includes/header.php';
     <h1 class="ft-page-title">Riwayat Transaksi</h1>
     <p class="ft-page-sub">
         Data transaksi selama periode yang dipilih.
-        <?php if (!$db_connected): ?>
-            <span style="color:#FBBF24; font-weight:800; margin-left:10px;">[🔌 Mode Demo Aktif]</span>
-        <?php endif; ?>
     </p>
   </div>
 
@@ -207,15 +204,13 @@ require_once '../../includes/header.php';
             <td><?=statusBadge($t['status'])?></td>
           </tr>
         <?php endforeach; else: ?>
-          <?php if ($db_connected): ?>
-            <tr><td colspan="7">
-              <div class="ft-empty">
-                <div class="ft-empty-icon">📊</div>
-                <p class="ft-empty-title">Data tidak ditemukan!</p>
-                <p class="ft-empty-sub">Tidak ada transaksi sesuai filter.</p>
-              </div>
-            </td></tr>
-          <?php endif; ?>
+          <tr><td colspan="7">
+            <div class="ft-empty">
+              <div class="ft-empty-icon"><?= $db_connected ? '📊' : '⚠️' ?></div>
+              <p class="ft-empty-title"><?= $db_connected ? 'Data tidak ditemukan!' : 'Layanan Gangguan' ?></p>
+              <p class="ft-empty-sub"><?= $db_connected ? 'Tidak ada transaksi sesuai filter.' : 'Gagal memuat riwayat transaksi karena gangguan database.' ?></p>
+            </div>
+          </td></tr>
         <?php endif; ?>
       </tbody>
     </table>
@@ -241,168 +236,7 @@ require_once '../../includes/header.php';
 </main>
 </div>
 
-<!-- Script pemrosesan client-side jika MySQL offline -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var dbConnected = <?= ($db_connected && $pdo) ? 'true' : 'false'; ?>;
-    if (!dbConnected) {
-        const orderHistory = JSON.parse(localStorage.getItem('order_history')) || [];
-        
-        // Baca filter dari URL query parameters
-        const params = new URLSearchParams(window.location.search);
-        const f_status = params.get('status') || 'all';
-        const f_payment = params.get('payment') || 'all';
-        const date_from = params.get('dari') || '';
-        const date_to = params.get('sampai') || '';
-        const search = (params.get('cari') || '').trim().toLowerCase();
-        const per_page = parseInt(params.get('per_page')) || 10;
-        const page = parseInt(params.get('page')) || 1;
-        const offset = (page - 1) * per_page;
-        
-        // Filter data orderHistory
-        let filtered = orderHistory.filter(item => {
-            // Filter Status
-            if (f_status !== 'all') {
-                const itemStatus = (item.status || 'pending').toLowerCase();
-                let mapped = 'pending';
-                if (itemStatus === 'success' || itemStatus === 'sukses') mapped = 'success';
-                else if (itemStatus === 'process' || itemStatus === 'proses') mapped = 'process';
-                else if (itemStatus === 'failed' || itemStatus === 'gagal') mapped = 'failed';
-                
-                if (mapped !== f_status) return false;
-            }
-            
-            // Filter Metode Pembayaran
-            if (f_payment !== 'all') {
-                const itemPayment = (item.payment || '').toLowerCase();
-                if (!itemPayment.includes(f_payment.toLowerCase())) return false;
-            }
-            
-            // Filter Rentang Tanggal (dari & sampai)
-            if (date_from || date_to) {
-                let itemDate = null;
-                if (item.date) {
-                    // Parsing format "DD/MM/YYYY, HH:MM:SS" ke Date object
-                    const parts = item.date.split(',')[0].split(/[\/\-]/);
-                    if (parts.length === 3) {
-                        itemDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                    }
-                }
-                if (itemDate) {
-                    if (date_from) {
-                        const fromDate = new Date(date_from);
-                        fromDate.setHours(0,0,0,0);
-                        if (itemDate < fromDate) return false;
-                    }
-                    if (date_to) {
-                        const toDate = new Date(date_to);
-                        toDate.setHours(23,59,59,999);
-                        if (itemDate > toDate) return false;
-                    }
-                } else {
-                    return false; // Skip jika tanggal tidak dapat di-parse
-                }
-            }
-            
-            // Filter Pencarian
-            if (search) {
-                const idMatch = String(item.id).toLowerCase().includes(search);
-                const productMatch = (item.product || '').toLowerCase().includes(search);
-                const gameMatch = (item.game || '').toLowerCase().includes(search);
-                const targetMatch = (item.targetId || '').toLowerCase().includes(search);
-                if (!idMatch && !productMatch && !gameMatch && !targetMatch) return false;
-            }
-            
-            return true;
-        });
-        
-        const total_rows = filtered.length;
-        const total_pages = Math.max(1, Math.ceil(total_rows / per_page));
-        const paginated = filtered.slice(offset, offset + per_page);
-        
-        // Render tabel data
-        const tbody = document.getElementById('transaksi-tbody');
-        if (total_rows > 0) {
-            tbody.innerHTML = '';
-            
-            paginated.forEach(order => {
-                const tr = document.createElement('tr');
-                
-                const status = order.status ? order.status.toLowerCase() : 'pending';
-                let badgeClass = 'pending';
-                let badgeText = 'Menunggu';
-                if (status === 'success' || status === 'sukses') {
-                    badgeClass = 'success';
-                    badgeText = 'Sukses';
-                } else if (status === 'process' || status === 'proses') {
-                    badgeClass = 'process';
-                    badgeText = 'Dalam Proses';
-                } else if (status === 'failed' || status === 'gagal') {
-                    badgeClass = 'failed';
-                    badgeText = 'Gagal';
-                }
-                
-                const formattedPrice = 'Rp ' + parseFloat(order.price || 0).toLocaleString('id-ID');
-                
-                tr.innerHTML = `
-                    <td><code style="color:#FBBF24;font-size:11px;">#${order.id} (Demo)</code></td>
-                    <td>${order.product || order.game || '-'}</td>
-                    <td>${order.targetId || '-'}</td>
-                    <td>${formattedPrice}</td>
-                    <td style="color:#888;">${(order.payment || '-').toUpperCase()}</td>
-                    <td style="color:#888;">${order.date}</td>
-                    <td><span class="ft-badge ${badgeClass}">${badgeText}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-            
-            // Tampilkan & Konfigurasi Box Paginasi
-            const paginationBox = document.getElementById('pagination-box');
-            paginationBox.style.display = 'flex';
-            
-            const startRange = offset + 1;
-            const endRange = Math.min(offset + per_page, total_rows);
-            document.getElementById('pagination-info').innerHTML = `Menampilkan <strong>${startRange.toLocaleString('id-ID')}</strong> sampai <strong>${endRange.toLocaleString('id-ID')}</strong> dari <strong>${total_rows.toLocaleString('id-ID')}</strong> hasil`;
-            
-            // Render Tombol Paginasi
-            const btnBox = document.getElementById('pagination-buttons');
-            let prevBtn = '';
-            if (page > 1) {
-                prevBtn = `<a href="${getPageUrl(page - 1)}" class="ft-btn ft-btn-secondary">← Sebelumnya</a>`;
-            } else {
-                prevBtn = `<span class="ft-btn ft-btn-secondary" style="opacity:0.4;cursor:default;">← Sebelumnya</span>`;
-            }
-            
-            let nextBtn = '';
-            if (page < total_pages) {
-                nextBtn = `<a href="${getPageUrl(page + 1)}" class="ft-btn ft-btn-secondary">Selanjutnya →</a>`;
-            } else {
-                nextBtn = `<span class="ft-btn ft-btn-secondary" style="opacity:0.4;cursor:default;">Selanjutnya →</span>`;
-            }
-            
-            btnBox.innerHTML = prevBtn + nextBtn;
-        } else {
-            // Render state kosong
-            tbody.innerHTML = `
-                <tr><td colspan="7">
-                  <div class="ft-empty">
-                    <div class="ft-empty-icon">📊</div>
-                    <p class="ft-empty-title">Data tidak ditemukan!</p>
-                    <p class="ft-empty-sub">Tidak ada transaksi demo sesuai filter.</p>
-                  </div>
-                </td></tr>
-            `;
-            document.getElementById('pagination-box').style.display = 'none';
-        }
-        
-        function getPageUrl(p) {
-            const q = new URLSearchParams(window.location.search);
-            q.set('page', p);
-            return '?' + q.toString();
-        }
-    }
-});
-</script>
+
 
 <?php
 require_once '../../includes/footer.php';

@@ -56,7 +56,7 @@ if ($db_connected && $pdo) {
 if (!$user) {
     $user = [
         'username' => $_SESSION['username'] ?? 'User',
-        'email' => $_SESSION['email'] ?? 'demo@example.com',
+        'email' => $_SESSION['email'] ?? '-',
         'no_hp' => $_SESSION['no_hp'] ?? $_SESSION['phone'] ?? '-',
         'created_at' => date('Y-m-d H:i:s')
     ];
@@ -101,17 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $msg_error = 'Gagal memperbarui profil di database: ' . $e->getMessage();
                 }
             } else {
-                // Mode Demo (Offline)
-                $_SESSION['username'] = $username;
-                $_SESSION['email'] = $email;
-                $_SESSION['no_hp'] = $phone;
-                $_SESSION['phone'] = $phone;
-                
-                $user['username'] = $username;
-                $user['email']    = $email;
-                $user[$db_phone_col] = $phone;
-                
-                $msg_sukses = 'Profil berhasil diperbarui! (Mode Demo Aktif)';
+                $msg_error = __('layanan_gangguan_profil');
             }
         } else {
             $msg_error = 'Username dan email tidak boleh kosong.';
@@ -151,16 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $msg_error = 'Gagal mengubah password di database.';
                 }
             } else {
-                // Mode Demo (Offline)
-                if (strlen($pw_baru) >= 6) {
-                    if ($pw_baru === $pw_konfirm) {
-                        $msg_sukses = 'Password berhasil diubah! (Simulasi Mode Demo)';
-                    } else {
-                        $msg_error = 'Konfirmasi password baru tidak cocok.';
-                    }
-                } else {
-                    $msg_error = 'Password baru minimal 6 karakter.';
-                }
+                $msg_error = __('layanan_gangguan_profil');
             }
         } else {
             $msg_error = 'Semua input password wajib diisi.';
@@ -184,9 +165,6 @@ require_once '../../includes/header.php';
     <h1 class="ft-page-title">Profil Saya</h1>
     <p class="ft-page-sub">
         Kelola informasi akun FUNtopup kamu.
-        <?php if (!$db_connected): ?>
-            <span style="color:#FBBF24; font-weight:800; margin-left:10px;">[🔌 Mode Demo Aktif]</span>
-        <?php endif; ?>
     </p>
   </div>
 

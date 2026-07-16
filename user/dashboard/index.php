@@ -67,7 +67,7 @@ if ($db_connected && $pdo) {
 if (!$user) {
     $user = [
         'username' => $_SESSION['username'] ?? 'User',
-        'email' => $_SESSION['email'] ?? 'demo@example.com',
+        'email' => $_SESSION['email'] ?? '-',
         'no_hp' => $_SESSION['no_hp'] ?? $_SESSION['phone'] ?? '-',
         'created_at' => date('Y-m-d H:i:s')
     ];
@@ -104,9 +104,6 @@ require_once '../../includes/header.php';
     <h1 class="ft-page-title">Dashboard</h1>
     <p class="ft-page-sub">
         Selamat datang, <strong><?= htmlspecialchars($user['username'] ?? '') ?></strong> 👋 
-        <?php if (!$db_connected): ?>
-            <span style="color:#FBBF24; font-weight:800; margin-left:10px;">[🔌 Mode Demo Aktif]</span>
-        <?php endif; ?>
     </p>
   </div>
 
@@ -205,103 +202,7 @@ require_once '../../includes/header.php';
 </main>
 </div>
 
-<!-- Script pemrosesan client-side jika MySQL offline -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var dbConnected = <?= ($db_connected && $pdo) ? 'true' : 'false'; ?>;
-    if (!dbConnected) {
-        const orderHistory = JSON.parse(localStorage.getItem('order_history')) || [];
-        
-        // Buat filter tanggal hari ini (Format local topup.js: "DD/MM/YYYY")
-        const todayDate = new Date();
-        const todayDay = String(todayDate.getDate()).padStart(2, '0');
-        const todayMonth = String(todayDate.getMonth() + 1).padStart(2, '0');
-        const todayYear = todayDate.getFullYear();
-        const todayPrefix1 = `${todayDay}/${todayMonth}/${todayYear}`;
-        const todayPrefix2 = `${todayDay}-${todayMonth}-${todayYear}`;
-        
-        let totalTrx = 0;
-        let totalNominal = 0;
-        let statuses = { pending: 0, process: 0, success: 0, failed: 0 };
-        let recentRows = [];
-        
-        orderHistory.forEach(order => {
-            const orderDateStr = order.date || '';
-            const isToday = orderDateStr.includes(todayPrefix1) || orderDateStr.includes(todayPrefix2);
-            
-            if (isToday) {
-                totalTrx++;
-                const status = order.status ? order.status.toLowerCase() : 'pending';
-                let mappedStatus = 'pending';
-                if (status === 'success' || status === 'sukses') mappedStatus = 'success';
-                else if (status === 'process' || status === 'proses') mappedStatus = 'process';
-                else if (status === 'failed' || status === 'gagal') mappedStatus = 'failed';
-                
-                if (mappedStatus in statuses) {
-                    statuses[mappedStatus]++;
-                }
-                
-                if (mappedStatus === 'success') {
-                    totalNominal += parseFloat(order.price || 0);
-                }
-                
-                recentRows.push(order);
-            }
-        });
-        
-        // Tulis stats ke DOM
-        document.getElementById('stat-total-trx').textContent = totalTrx;
-        document.getElementById('stat-total-nominal').textContent = 'Rp ' + totalNominal.toLocaleString('id-ID');
-        document.getElementById('stat-pending').textContent = statuses.pending;
-        document.getElementById('stat-process').textContent = statuses.process;
-        document.getElementById('stat-success').textContent = statuses.success;
-        document.getElementById('stat-failed').textContent = statuses.failed;
-        
-        // Render tabel transaksi terbaru hari ini
-        const tbody = document.getElementById('recent-transactions-tbody');
-        if (recentRows.length > 0) {
-            tbody.innerHTML = ''; // bersihkan kosong placeholder
-            
-            recentRows.slice(0, 10).forEach(order => {
-                const tr = document.createElement('tr');
-                
-                const status = order.status ? order.status.toLowerCase() : 'pending';
-                let badgeClass = 'pending';
-                let badgeText = 'Menunggu';
-                if (status === 'success' || status === 'sukses') {
-                    badgeClass = 'success';
-                    badgeText = 'Sukses';
-                } else if (status === 'process' || status === 'proses') {
-                    badgeClass = 'process';
-                    badgeText = 'Dalam Proses';
-                } else if (status === 'failed' || status === 'gagal') {
-                    badgeClass = 'failed';
-                    badgeText = 'Gagal';
-                }
-                
-                const formattedPrice = 'Rp ' + parseFloat(order.price || 0).toLocaleString('id-ID');
-                
-                tr.innerHTML = `
-                    <td><code style="color:#FBBF24;font-size:11px;">#${order.id} (Demo)</code></td>
-                    <td>${order.product || order.game || '-'}</td>
-                    <td>${order.targetId || '-'}</td>
-                    <td>${formattedPrice}</td>
-                    <td style="color:#888;">${(order.payment || '-').toUpperCase()}</td>
-                    <td style="color:#888;">${order.date}</td>
-                    <td><span class="ft-badge ${badgeClass}">${badgeText}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-            
-            // Tampilkan tombol lihat semua
-            const viewAllContainer = document.getElementById('view-all-container');
-            if (viewAllContainer) {
-                viewAllContainer.style.display = 'block';
-            }
-        }
-    }
-});
-</script>
+
 
 <?php
 // Load footer website FUNtopup
