@@ -114,7 +114,7 @@
                     </a>
                 <?php else: ?>
                     <a href="<?php echo $base_url; ?>user/riwayat.php" class="nav-item <?php echo ($current_page == 'riwayat.php') ? 'active' : ''; ?>">
-                        <span><?php echo __('riwayat'); ?> (Demo)</span>
+                        <span><?php echo __('riwayat'); ?></span>
                     </a>
                     <a href="<?php echo $base_url; ?>user/auth/login.php" class="btn-masuk">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

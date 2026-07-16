@@ -2,6 +2,12 @@
 require_once '../config/db.php';
 require_once '../includes/header.php';
 
+// Redirect if not logged in
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    echo "<script>window.location.href = '" . $base_url . "user/auth/login.php';</script>";
+    exit;
+}
+
 $db_transactions = [];
 $db_connected_and_logged_in = false;
 
@@ -38,65 +44,55 @@ if ($db_connected && isset($_SESSION['user_id'])) {
         </p>
     </div>
 
-    <div class="card table-wrapper-card">
-        <table class="riwayat-table">
-            <thead>
-                <tr>
-                    <th>
-                        <?php echo $current_lang === 'id' ? 'No. Transaksi' : 'Tx Invoice'; ?>
-                    </th>
-                    <th>
-                        <?php echo $current_lang === 'id' ? 'Tanggal' : 'Date'; ?>
-                    </th>
-                    <th><?php echo __('game'); ?></th>
-                    <th><?php echo __('produk'); ?></th>
-                    <th><?php echo __('target_id'); ?></th>
-                    <th><?php echo __('metode'); ?></th>
-                    <th><?php echo $current_lang === 'id' ? 'Harga' : 'Price'; ?></th>
-                    <th class="col-status">Status</th>
-                </tr>
-            </thead>
-            <tbody id="transaction-tbody">
-                <?php if ($db_connected_and_logged_in): ?>
-                    <?php if (count($db_transactions) > 0): ?>
-                        <?php foreach ($db_transactions as $tx): ?>
+    <div class="card table-wrapper-card" style="border: none; background: transparent; padding: 0; box-shadow: none;">
+        <?php if ($db_connected_and_logged_in): ?>
+            <div class="card table-wrapper-card">
+                <table class="riwayat-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <?php echo $current_lang === 'id' ? 'No. Transaksi' : 'Tx Invoice'; ?>
+                            </th>
+                            <th>
+                                <?php echo $current_lang === 'id' ? 'Tanggal' : 'Date'; ?>
+                            </th>
+                            <th><?php echo __('game'); ?></th>
+                            <th><?php echo __('produk'); ?></th>
+                            <th><?php echo __('target_id'); ?></th>
+                            <th><?php echo __('metode'); ?></th>
+                            <th><?php echo $current_lang === 'id' ? 'Harga' : 'Price'; ?></th>
+                            <th class="col-status">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-tbody">
+                        <?php if (count($db_transactions) > 0): ?>
+                            <?php foreach ($db_transactions as $tx): ?>
+                                <tr>
+                                    <td class="col-invoice">#<?php echo $tx['id']; ?></td>
+                                    <td class="col-date"><?php echo date("d-m-Y H:i", strtotime($tx['created_at'])); ?></td>
+                                    <td class="col-game"><?php echo htmlspecialchars($tx['nama_game']); ?></td>
+                                    <td class="col-product"><?php echo htmlspecialchars($tx['nama_produk']); ?></td>
+                                    <td><code><?php echo htmlspecialchars($tx['id_game_user']); ?></code></td>
+                                    <td class="col-payment"><?php echo htmlspecialchars($tx['nama_metode']); ?></td>
+                                    <td class="col-price">Rp <?php echo number_format($tx['nominal_transfer'], 0, ',', '.'); ?></td>
+                                    <td class="col-status">
+                                        <span class="badge badge-<?php echo $tx['status']; ?>"><?php echo htmlspecialchars($tx['status']); ?></span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
                             <tr>
-                                <td class="col-invoice">#<?php echo $tx['id']; ?></td>
-                                <td class="col-date"><?php echo date("d-m-Y H:i", strtotime($tx['created_at'])); ?></td>
-                                <td class="col-game"><?php echo htmlspecialchars($tx['nama_game']); ?></td>
-                                <td class="col-product"><?php echo htmlspecialchars($tx['nama_produk']); ?></td>
-                                <td><code><?php echo htmlspecialchars($tx['id_game_user']); ?></code></td>
-                                <td class="col-payment"><?php echo htmlspecialchars($tx['nama_metode']); ?></td>
-                                <td class="col-price">Rp <?php echo number_format($tx['nominal_transfer'], 0, ',', '.'); ?></td>
-                                <td class="col-status">
-                                    <span class="badge badge-<?php echo $tx['status']; ?>"><?php echo htmlspecialchars($tx['status']); ?></span>
+                                <td colspan="8" class="table-empty-cell">
+                                    <?php echo $current_lang === 'id' ? 'Belum ada riwayat transaksi di database.' : 'No transactions recorded in database.'; ?>
                                 </td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="8" class="table-empty-cell">
-                                <?php echo $current_lang === 'id' ? 'Belum ada riwayat transaksi di database.' : 'No transactions recorded in database.'; ?>
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <tr id="no-history-row">
-                        <td colspan="8" class="table-empty-cell">
-                            <?php echo $current_lang === 'id' 
-                                ? 'Belum ada riwayat transaksi. Lakukan pembelian di halaman game untuk memunculkan transaksi demo.' 
-                                : 'No history found. Complete a purchase on a game top-up page to generate demo transactions.'; ?>
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <div id="clear-demo-container" class="clear-demo-container">
-        <button id="btn-clear-demo" class="btn btn-outline btn-clear-demo">
-            🗑️ <?php echo $current_lang === 'id' ? 'Bersihkan Riwayat Demo' : 'Clear Demo History'; ?>
-        </button>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <?php require_once '../includes/service-notice.php'; ?>
+        <?php endif; ?>
     </div>
 
     <div class="card guide-card">
@@ -110,10 +106,5 @@ if ($db_connected && isset($_SESSION['user_id'])) {
         </ol>
     </div>
 </div>
-
-<script>
-    window.isDbConnected = <?php echo $db_connected_and_logged_in ? 'true' : 'false'; ?>;
-</script>
-<script src="<?php echo $base_url; ?>assets/js/riwayat.js"></script>
 
 <?php require_once '../includes/footer.php'; ?>

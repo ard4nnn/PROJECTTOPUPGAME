@@ -93,7 +93,7 @@ if (!empty($search_id)) {
             </div>
         </div>
 
-        <div id="tx-error-box" class="tx-error-box" style="display: <?php echo (!empty($search_id) && !$transaction && $is_db_tx) ? 'block' : 'none'; ?>;">
+        <div id="tx-error-box" class="tx-error-box" style="display: <?php echo (!empty($search_id) && !$transaction) ? 'block' : 'none'; ?>;">
             ⚠️ <?php echo __('tidak_ditemukan'); ?>
         </div>
 
@@ -105,10 +105,6 @@ if (!empty($search_id)) {
     </div>
 </div>
 
-<script>
-    window.isDbTx = <?php echo $is_db_tx ? 'true' : 'false'; ?>;
-    window.searchId = "<?php echo htmlspecialchars($search_id); ?>";
-</script>
 <script src="<?php echo $base_url; ?>assets/js/cek-transaksi.js"></script>
 
 <?php require_once 'includes/footer.php'; ?>
