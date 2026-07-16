@@ -1,6 +1,6 @@
 <?php
 return [
-    'end_time' => '2026-07-01 23:59:59',
+    'end_time' => date('Y-m-d H:i:s', time() + 3 * 24 * 60 * 60),
     'title' => 'PASTI TER-MURAAHH',
     'subtitle' => 'Bandingkan dan Buktikan Sendiri!',
     'items' => [

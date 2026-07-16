@@ -19,6 +19,10 @@ if (timerContainer) {
             if (hoursEl) hoursEl.textContent = '00';
             if (minsEl) minsEl.textContent = '00';
             if (secsEl) secsEl.textContent = '00';
+            const section = document.querySelector('.flash-sale-section');
+            if (section) {
+                section.style.display = 'none';
+            }
             return;
         }
 
