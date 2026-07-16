@@ -5,10 +5,6 @@ if (session_status() == PHP_SESSION_NONE) {
 
 $base_url = "/PROJECTTOPUPGAME/";
 
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['mock_user'] = true;
-}
-
 // Language Logic
 if (isset($_GET['lang'])) {
     $lang = $_GET['lang'] === 'en' ? 'en' : 'id';
