@@ -26,15 +26,7 @@ if ($db_connected && $pdo) {
 }
 
 if (!$db_loaded) {
-    $leaderboard = [
-        ['username' => 'SultanGamer99', 'total_spent' => 5450000],
-        ['username' => 'RajaTopup_ML', 'total_spent' => 3820000],
-        ['username' => 'WibuSultan', 'total_spent' => 2900000],
-        ['username' => 'LordGamer_21', 'total_spent' => 1750000],
-        ['username' => 'NontonAjaDeh', 'total_spent' => 1200000],
-        ['username' => 'PlayerGratisan', 'total_spent' => 950000],
-        ['username' => 'CobaCobaTopup', 'total_spent' => 450000]
-    ];
+    $leaderboard = [];
 }
 
 if (!function_exists('getVipLevel')) {
@@ -68,84 +60,91 @@ if (!function_exists('getVipColor')) {
         </p>
     </div>
 
-    <div class="podium-container">
-        <?php if (isset($leaderboard[1])): ?>
-            <div class="podium-rank-2-3">
-                <span class="podium-medal">🥈</span>
-                <span class="podium-username"><?php echo htmlspecialchars($leaderboard[1]['username']); ?></span>
-                <span class="podium-spent">Rp <?php echo number_format($leaderboard[1]['total_spent'], 0, ',', '.'); ?></span>
-                <div class="podium-box-2">
-                    <strong class="podium-number">2</strong>
+    <?php if ($db_loaded): ?>
+        <div class="podium-container">
+            <?php if (isset($leaderboard[1])): ?>
+                <div class="podium-rank-2-3">
+                    <span class="podium-medal">🥈</span>
+                    <span class="podium-username"><?php echo htmlspecialchars($leaderboard[1]['username']); ?></span>
+                    <span class="podium-spent">Rp <?php echo number_format($leaderboard[1]['total_spent'], 0, ',', '.'); ?></span>
+                    <div class="podium-box-2">
+                        <strong class="podium-number">2</strong>
+                    </div>
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
 
-        <?php if (isset($leaderboard[0])): ?>
-            <div class="podium-rank-1">
-                <span class="podium-medal-crown">👑</span>
-                <span class="podium-username-1"><?php echo htmlspecialchars($leaderboard[0]['username']); ?></span>
-                <span class="podium-spent-1">Rp <?php echo number_format($leaderboard[0]['total_spent'], 0, ',', '.'); ?></span>
-                <div class="podium-box-1">
-                    <strong class="podium-number-1">1</strong>
+            <?php if (isset($leaderboard[0])): ?>
+                <div class="podium-rank-1">
+                    <span class="podium-medal-crown">👑</span>
+                    <span class="podium-username-1"><?php echo htmlspecialchars($leaderboard[0]['username']); ?></span>
+                    <span class="podium-spent-1">Rp <?php echo number_format($leaderboard[0]['total_spent'], 0, ',', '.'); ?></span>
+                    <div class="podium-box-1">
+                        <strong class="podium-number-1">1</strong>
+                    </div>
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
 
-        <?php if (isset($leaderboard[2])): ?>
-            <div class="podium-rank-2-3" style="order: 3;">
-                <span class="podium-medal">🥉</span>
-                <span class="podium-username"><?php echo htmlspecialchars($leaderboard[2]['username']); ?></span>
-                <span class="podium-spent">Rp <?php echo number_format($leaderboard[2]['total_spent'], 0, ',', '.'); ?></span>
-                <div class="podium-box-3">
-                    <strong class="podium-number-3">3</strong>
+            <?php if (isset($leaderboard[2])): ?>
+                <div class="podium-rank-2-3" style="order: 3;">
+                    <span class="podium-medal">🥉</span>
+                    <span class="podium-username"><?php echo htmlspecialchars($leaderboard[2]['username']); ?></span>
+                    <span class="podium-spent">Rp <?php echo number_format($leaderboard[2]['total_spent'], 0, ',', '.'); ?></span>
+                    <div class="podium-box-3">
+                        <strong class="podium-number-3">3</strong>
+                    </div>
                 </div>
-            </div>
-        <?php endif; ?>
-    </div>
+            <?php endif; ?>
+        </div>
 
-    <div class="card table-wrapper-card">
-        <table class="leaderboard-table">
-            <thead>
-                <tr>
-                    <th class="col-rank-header"><?php echo __('rank'); ?></th>
-                    <th><?php echo __('user'); ?></th>
-                    <th><?php echo __('level'); ?></th>
-                    <th class="col-spent-header"><?php echo __('total_spent'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($leaderboard as $index => $row): 
-                    $rank = $index + 1;
-                    $rankClass = 'rank-other';
-                    if ($rank === 1) $rankClass = 'rank-1';
-                    else if ($rank === 2) $rankClass = 'rank-2';
-                    else if ($rank === 3) $rankClass = 'rank-3';
-                    
-                    $vip = getVipLevel($row['total_spent']);
-                    $vipColor = getVipColor($row['total_spent']);
-                ?>
-                    <tr class="leaderboard-row">
-                        <td class="col-rank">
-                            <span class="rank-badge <?php echo $rankClass; ?>"><?php echo $rank; ?></span>
-                        </td>
-                        <td>
-                            <strong class="leaderboard-username">
-                                <?php echo htmlspecialchars($row['username']); ?>
-                            </strong>
-                        </td>
-                        <td>
-                            <span class="vip-badge" style="background-color: <?php echo $vipColor; ?>;">
-                                <?php echo $vip; ?>
-                            </span>
-                        </td>
-                        <td class="col-spent">
-                            Rp <?php echo number_format($row['total_spent'], 0, ',', '.'); ?>
-                        </td>
+        <div class="card table-wrapper-card">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th class="col-rank-header"><?php echo __('rank'); ?></th>
+                        <th><?php echo __('user'); ?></th>
+                        <th><?php echo __('level'); ?></th>
+                        <th class="col-spent-header"><?php echo __('total_spent'); ?></th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    <?php foreach ($leaderboard as $index => $row): 
+                        $rank = $index + 1;
+                        $rankClass = 'rank-other';
+                        if ($rank === 1) $rankClass = 'rank-1';
+                        else if ($rank === 2) $rankClass = 'rank-2';
+                        else if ($rank === 3) $rankClass = 'rank-3';
+                        
+                        $vip = getVipLevel($row['total_spent']);
+                        $vipColor = getVipColor($row['total_spent']);
+                    ?>
+                        <tr class="leaderboard-row">
+                            <td class="col-rank">
+                                <span class="rank-badge <?php echo $rankClass; ?>"><?php echo $rank; ?></span>
+                            </td>
+                            <td>
+                                <strong class="leaderboard-username">
+                                    <?php echo htmlspecialchars($row['username']); ?>
+                                </strong>
+                            </td>
+                            <td>
+                                <span class="vip-badge" style="background-color: <?php echo $vipColor; ?>;">
+                                    <?php echo $vip; ?>
+                                </span>
+                            </td>
+                            <td class="col-spent">
+                                Rp <?php echo number_format($row['total_spent'], 0, ',', '.'); ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php else: ?>
+        <?php 
+        $notice_message = __('layanan_gangguan');
+        require_once 'includes/service-notice.php'; 
+        ?>
+    <?php endif; ?>
 
 </div>
 

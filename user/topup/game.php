@@ -8,9 +8,7 @@ $game = null;
 $produk_list = [];
 $metode_list = [];
 
-$gamelist_data = require '../../data/gamelist.php';
-$mock_games = $gamelist_data['mock_games'];
-$mock_payments = $gamelist_data['mock_payments'];
+
 
 if (empty($slug)) {
     $slug = 'mobile-legends';
@@ -36,15 +34,8 @@ if ($db_connected && $pdo) {
 }
 
 if (!$db_connected || !$game) {
-    if (array_key_exists($slug, $mock_games)) {
-        $game = [
-            'id' => $mock_games[$slug]['id'],
-            'nama_game' => $mock_games[$slug]['nama_game'],
-            'slug' => $slug,
-            'deskripsi' => $mock_games[$slug]['deskripsi']
-        ];
-        $produk_list = $mock_games[$slug]['produk'];
-        $metode_list = $mock_payments;
+    if (!$db_connected) {
+        $error = __('layanan_gangguan');
     } else {
         $error = 'Game tidak ditemukan!';
     }
@@ -53,8 +44,13 @@ if (!$db_connected || !$game) {
 
 <div class="container topup-container">
     <?php if (!empty($error)): ?>
-        <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-        <a href="../../index.php" class="btn btn-primary">&larr; <?php echo __('kembali'); ?></a>
+        <?php 
+        $notice_message = $error;
+        require_once '../../includes/service-notice.php'; 
+        ?>
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="../../index.php" class="btn btn-primary">&larr; <?php echo __('kembali'); ?></a>
+        </div>
     <?php else: ?>
         
         <div class="topup-back-btn-container">

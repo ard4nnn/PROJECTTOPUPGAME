@@ -18,7 +18,8 @@ if ($db_connected && $pdo) {
 }
 
 if (!$db_connected) {
-    $games = $gamelist_data['fallback_games'];
+    $games = [];
+    $games_load_failed = true;
 }
 
 $flash_sale_end = $flashsale_data['end_time'];
@@ -49,21 +50,21 @@ $flash_sale_items = $flashsale_data['items'];
                 </div>
                 <div class="promo-right">
                     <div class="ticket-grid">
-                        <div class="ticket" onclick="copyPromoCode('JUNITOPUP2026')">
+                        <div class="ticket" onclick="copyPromoCode('FUNTOPUP2026')">
                             <span class="ticket-label"><?php echo __('promo_code'); ?> :</span>
-                            <span class="ticket-code">JUNITOPUP2026</span>
+                            <span class="ticket-code">FUNTOPUP2026</span>
                             <span class="ticket-discount">DISKON Rp 1.000</span>
                             <span class="ticket-min">*MIN. PEMBELIAN 10K</span>
                         </div>
-                        <div class="ticket" onclick="copyPromoCode('JUNICERIA2026')">
+                        <div class="ticket" onclick="copyPromoCode('FUNCERIA2026')">
                             <span class="ticket-label"><?php echo __('promo_code'); ?> :</span>
-                            <span class="ticket-code">JUNICERIA2026</span>
+                            <span class="ticket-code">FUNCERIA2026</span>
                             <span class="ticket-discount">DISKON Rp 3.000</span>
                             <span class="ticket-min">*MIN. PEMBELIAN 30K</span>
                         </div>
-                        <div class="ticket" onclick="copyPromoCode('JUNIMENYALA2026')">
+                        <div class="ticket" onclick="copyPromoCode('FUNMENYALA2026')">
                             <span class="ticket-label"><?php echo __('promo_code'); ?> :</span>
-                            <span class="ticket-code">JUNIMENYALA2026</span>
+                            <span class="ticket-code">FUNMENYALA2026</span>
                             <span class="ticket-discount">DISKON Rp 2.000</span>
                             <span class="ticket-min">*MIN. PEMBELIAN 20K</span>
                         </div>
@@ -255,15 +256,7 @@ $flash_sale_items = $flashsale_data['items'];
             <p class="section-subtitle"><?php echo __('game_populer_desc'); ?></p>
         </div>
         
-        <?php if (!$db_connected): ?>
-            <span class="badge badge-demo-mode">
-                🔌 <?php echo __('mode_demo'); ?>
-            </span>
-        <?php else: ?>
-            <span class="badge badge-online-mode">
-                🟢 Online Mode
-            </span>
-        <?php endif; ?>
+
     </div>
 
     <?php
@@ -290,42 +283,49 @@ $flash_sale_items = $flashsale_data['items'];
     ];
     ?>
 
-    <div id="game-grid" class="game-grid premium-game-grid">
-        <?php foreach ($games as $game): 
-            $slug = $game['slug'];
-            $config = isset($premium_game_configs[$slug]) ? $premium_game_configs[$slug] : [
-                'image' => $base_url . 'assets/images/default.png',
-                'color' => '0 0% 50%'
-            ];
-            $imageUrl = $config['image'];
-            $themeColor = $config['color'];
-            $href = $base_url . 'user/topup/game.php?slug=' . $slug;
-            $gameName = $game['nama_game'];
-            $desc = $game['deskripsi'] ? $game['deskripsi'] : 'Top up instan voucher game ' . $gameName . ' termurah dan aman.';
-        ?>
-            <div class="game-card premium-game-card-wrapper" data-name="<?php echo strtolower(htmlspecialchars($gameName)); ?>" style="--theme-color: <?php echo $themeColor; ?>;">
-                <a href="<?php echo htmlspecialchars($href); ?>" class="premium-game-card" aria-label="Top up <?php echo htmlspecialchars($gameName); ?>">
-                    <div class="premium-card-bg" style="background-image: url('<?php echo htmlspecialchars($imageUrl); ?>');"></div>
-                    <div class="premium-card-overlay"></div>
-                    <div class="premium-card-content">
-                        <div class="premium-card-bottom">
-                            <div class="premium-card-info">
-                                <h3 class="premium-game-title"><?php echo htmlspecialchars($gameName); ?></h3>
-                                <p class="premium-game-desc"><?php echo htmlspecialchars($desc); ?></p>
-                            </div>
-                            <div class="premium-card-btn">
-                                <span>Top Up Sekarang</span>
-                                <svg class="premium-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    <polyline points="12 5 19 12 12 19"></polyline>
-                                </svg>
+    <?php if (!empty($games)): ?>
+        <div id="game-grid" class="game-grid premium-game-grid">
+            <?php foreach ($games as $game): 
+                $slug = $game['slug'];
+                $config = isset($premium_game_configs[$slug]) ? $premium_game_configs[$slug] : [
+                    'image' => $base_url . 'assets/images/default.png',
+                    'color' => '0 0% 50%'
+                ];
+                $imageUrl = $config['image'];
+                $themeColor = $config['color'];
+                $href = $base_url . 'user/topup/game.php?slug=' . $slug;
+                $gameName = $game['nama_game'];
+                $desc = $game['deskripsi'] ? $game['deskripsi'] : 'Top up instan voucher game ' . $gameName . ' termurah dan aman.';
+            ?>
+                <div class="game-card premium-game-card-wrapper" data-name="<?php echo strtolower(htmlspecialchars($gameName)); ?>" style="--theme-color: <?php echo $themeColor; ?>;">
+                    <a href="<?php echo htmlspecialchars($href); ?>" class="premium-game-card" aria-label="Top up <?php echo htmlspecialchars($gameName); ?>">
+                        <div class="premium-card-bg" style="background-image: url('<?php echo htmlspecialchars($imageUrl); ?>');"></div>
+                        <div class="premium-card-overlay"></div>
+                        <div class="premium-card-content">
+                            <div class="premium-card-bottom">
+                                <div class="premium-card-info">
+                                    <h3 class="premium-game-title"><?php echo htmlspecialchars($gameName); ?></h3>
+                                    <p class="premium-game-desc"><?php echo htmlspecialchars($desc); ?></p>
+                                </div>
+                                <div class="premium-card-btn">
+                                    <span>Top Up Sekarang</span>
+                                    <svg class="premium-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </a>
-            </div>
-        <?php endforeach; ?>
-    </div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <?php 
+        $notice_message = __('layanan_gangguan');
+        require_once 'includes/service-notice.php'; 
+        ?>
+    <?php endif; ?>
 
     <div id="no-game-alert" class="no-game-alert">
         <span class="no-game-alert-icon">🔍</span>
