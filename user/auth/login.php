@@ -11,43 +11,70 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-
-    if (empty($username) || empty($password)) {
-        $error = 'Harap isi semua field!';
+    // ─── CSRF Verification ─────────────────────────────────────────
+    if (!csrf_verify()) {
+        $error = 'Permintaan tidak valid. Silakan muat ulang halaman dan coba lagi.';
     } else {
-        // Flag: true hanya jika DB hidup tapi kredensial salah (TIDAK boleh fallback ke demo)
-        $auth_failed_with_live_db = false;
+        // ─── Rate Limiting: max 5 percobaan gagal dalam 5 menit ───────
+        $max_attempts  = 5;
+        $lockout_time  = 300; // 5 menit dalam detik
 
-        if ($db_connected && $pdo) {
-            try {
-                $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
-                $stmt->execute([$username, $username]);
-                $user = $stmt->fetch();
+        if (!isset($_SESSION['login_attempts']))     $_SESSION['login_attempts'] = 0;
+        if (!isset($_SESSION['login_last_attempt'])) $_SESSION['login_last_attempt'] = 0;
 
-                if ($user && password_verify($password, $user['password'])) {
-                    // Login sukses — set session dan redirect
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['saldo'] = $user['saldo'];
-                    echo "<script>window.location.href = '" . $base_url . "';</script>";
-                    exit;
-                } else {
-                    // DB hidup, tapi kredensial salah — JANGAN fallback ke demo
-                    $error = 'Username atau password salah!';
-                    $auth_failed_with_live_db = true;
-                }
-            } catch (PDOException $e) {
-                // DB hidup tapi error saat query — tidak boleh login
-                $error = __('layanan_gangguan_login');
-                $db_connected = false; // tandai agar kondisi di bawah terpicu
-            }
+        // Reset jika window waktu sudah habis
+        if (time() - $_SESSION['login_last_attempt'] > $lockout_time) {
+            $_SESSION['login_attempts'] = 0;
         }
 
-        // Gagal karena DB offline dan bukan karena salah kredensial
-        if (!$db_connected && !$auth_failed_with_live_db) {
-            $error = __('layanan_gangguan_login');
+        if ($_SESSION['login_attempts'] >= $max_attempts) {
+            $sisa = $lockout_time - (time() - $_SESSION['login_last_attempt']);
+            $error = 'Terlalu banyak percobaan login. Silakan coba lagi dalam ' . ceil($sisa / 60) . ' menit.';
+        } else {
+            // ─── Validasi kredensial (logic asli, tidak diubah) ────────
+            $username = trim($_POST['username']);
+            $password = $_POST['password'];
+
+            if (empty($username) || empty($password)) {
+                $error = 'Harap isi semua field!';
+            } else {
+                // Flag: true hanya jika DB hidup tapi kredensial salah (TIDAK boleh fallback ke demo)
+                $auth_failed_with_live_db = false;
+
+                if ($db_connected && $pdo) {
+                    try {
+                        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
+                        $stmt->execute([$username, $username]);
+                        $user = $stmt->fetch();
+
+                        if ($user && password_verify($password, $user['password'])) {
+                            // Login sukses — reset rate-limit counter
+                            $_SESSION['login_attempts'] = 0;
+                            $_SESSION['user_id'] = $user['id'];
+                            $_SESSION['username'] = $user['username'];
+                            $_SESSION['saldo'] = $user['saldo'];
+                            echo "<script>window.location.href = '" . $base_url . "';</script>";
+                            exit;
+                        } else {
+                            // DB hidup, tapi kredensial salah — JANGAN fallback ke demo
+                            $error = 'Username atau password salah!';
+                            $auth_failed_with_live_db = true;
+                            // Increment rate-limit counter
+                            $_SESSION['login_attempts']++;
+                            $_SESSION['login_last_attempt'] = time();
+                        }
+                    } catch (PDOException $e) {
+                        // DB hidup tapi error saat query — tidak boleh login
+                        $error = __('layanan_gangguan_login');
+                        $db_connected = false; // tandai agar kondisi di bawah terpicu
+                    }
+                }
+
+                // Gagal karena DB offline dan bukan karena salah kredensial
+                if (!$db_connected && !$auth_failed_with_live_db) {
+                    $error = __('layanan_gangguan_login');
+                }
+            }
         }
     }
 }
@@ -134,6 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form action="" method="POST" class="space-y-5">
+      <?php echo csrf_field(); ?>
       <div class="text-center mb-1">
         <h2 class="text-xl font-bold text-zinc-50">Selamat Datang</h2>
         <p class="text-sm text-zinc-400 mt-1">Silakan login ke akun FUNtopup Anda</p>
