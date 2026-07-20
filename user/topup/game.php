@@ -803,7 +803,8 @@ if (!$db_connected || !$game) {
     // Inject PHP variables into JS scope for topup.js
     window._topupConfig = {
         processUrl: '<?php echo $base_url; ?>user/topup/process.php',
-        baseUrl:    '<?php echo $base_url; ?>'
+        baseUrl:    '<?php echo $base_url; ?>',
+        csrfToken:  '<?php echo htmlspecialchars($_SESSION["csrf_token"] ?? ""); ?>'
     };
 </script>
 <script src="<?php echo $base_url; ?>assets/js/topup.js"></script>
