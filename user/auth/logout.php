@@ -3,6 +3,9 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// Load init.php to get auto-calculated $base_url (must be BEFORE session destroy)
+require_once __DIR__ . '/../../includes/init.php';
+
 $_SESSION = array();
 
 if (ini_get("session.use_cookies")) {
@@ -15,6 +18,6 @@ if (ini_get("session.use_cookies")) {
 
 session_destroy();
 
-header("Location: /PROJECTTOPUPGAME/");
+header("Location: " . $base_url);
 exit;
 ?>
