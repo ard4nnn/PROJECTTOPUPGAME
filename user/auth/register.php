@@ -11,38 +11,43 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $no_hp = trim($_POST['no_hp']);
-    $password = $_POST['password'];
-
-    if (empty($username) || empty($email) || empty($no_hp) || empty($password)) {
-        $error = 'Semua data wajib diisi!';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password minimal terdiri dari 6 karakter!';
+    // ─── CSRF Verification ─────────────────────────────────────────
+    if (!csrf_verify()) {
+        $error = 'Permintaan tidak valid. Silakan muat ulang halaman dan coba lagi.';
     } else {
-        if ($db_connected && $pdo) {
-            try {
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-                $stmt->execute([$username, $email]);
-                
-                if ($stmt->rowCount() > 0) {
-                    $error = 'Username atau Email sudah terdaftar!';
-                } else {
-                    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-                    $stmt = $pdo->prepare("INSERT INTO users (username, email, password, no_hp, saldo) VALUES (?, ?, ?, ?, 0.00)");
-                    $stmt->execute([$username, $email, $hashed_password, $no_hp]);
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $no_hp = trim($_POST['no_hp']);
+        $password = $_POST['password'];
+
+        if (empty($username) || empty($email) || empty($no_hp) || empty($password)) {
+            $error = 'Semua data wajib diisi!';
+        } elseif (strlen($password) < 6) {
+            $error = 'Password minimal terdiri dari 6 karakter!';
+        } else {
+            if ($db_connected && $pdo) {
+                try {
+                    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+                    $stmt->execute([$username, $email]);
                     
-                    $success = 'Pendaftaran berhasil! Silakan login.';
+                    if ($stmt->rowCount() > 0) {
+                        $error = 'Username atau Email sudah terdaftar!';
+                    } else {
+                        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+                        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, no_hp, saldo) VALUES (?, ?, ?, ?, 0.00)");
+                        $stmt->execute([$username, $email, $hashed_password, $no_hp]);
+                        
+                        $success = 'Pendaftaran berhasil! Silakan login.';
+                    }
+                } catch (PDOException $e) {
+                    $error = __('layanan_gangguan_register');
+                    $db_connected = false;
                 }
-            } catch (PDOException $e) {
-                $error = __('layanan_gangguan_register');
-                $db_connected = false;
             }
-        }
-        
-        if (!$db_connected && empty($error)) {
-            $error = __('layanan_gangguan_register');
+            
+            if (!$db_connected && empty($error)) {
+                $error = __('layanan_gangguan_register');
+            }
         }
     }
 }
@@ -136,6 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form action="" method="POST" class="space-y-4">
+      <?php echo csrf_field(); ?>
       <div class="text-center mb-1">
         <h2 class="text-xl font-bold text-zinc-50">Daftar Akun</h2>
         <p class="text-sm text-zinc-400 mt-1">Buat akun FUNtopup Anda sekarang</p>
