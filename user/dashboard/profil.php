@@ -65,8 +65,11 @@ if (!$user) {
 
 // Handle Form Submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ─── CSRF Verification ─────────────────────────────────────────
+    if (!csrf_verify()) {
+        $msg_error = 'Permintaan tidak valid. Silakan muat ulang halaman dan coba lagi.';
+    } else {
     $action = $_POST['action'] ?? '';
-
     if ($action === 'update_profil') {
         $username = trim($_POST['username'] ?? '');
         $email    = trim($_POST['email']    ?? '');
@@ -147,6 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg_error = 'Semua input password wajib diisi.';
         }
     }
+    } // end CSRF else
 }
 
 $avatar_char = strtoupper(substr($user['username'] ?? 'U', 0, 1));
@@ -189,6 +193,7 @@ require_once '../../includes/header.php';
   <div class="ft-card" style="padding:1.5rem;margin-bottom:1rem;">
     <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">Edit Informasi Profil</h2>
     <form method="POST">
+      <?php echo csrf_field(); ?>
       <input type="hidden" name="action" value="update_profil">
       <div class="ft-form-grid">
         <div class="ft-form-group">
@@ -212,6 +217,7 @@ require_once '../../includes/header.php';
   <div class="ft-card" style="padding:1.5rem;">
     <h2 style="font-size:1rem;font-weight:700;color:#fff;margin:0 0 1rem 0;">Ganti Password</h2>
     <form method="POST">
+      <?php echo csrf_field(); ?>
       <input type="hidden" name="action" value="ganti_password">
       <div class="ft-form-grid">
         <div class="ft-form-group">
