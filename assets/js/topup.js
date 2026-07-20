@@ -254,6 +254,7 @@ if (btnSubmit) {
             btnSubmit.textContent = window.currentLang === 'id' ? 'Memproses...' : 'Processing...';
 
             var formData = new FormData();
+            formData.append('csrf_token', window._topupConfig.csrfToken || '');
             formData.append('produk_id', selectedProduct.id);
             formData.append('id_game_user', idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : ''));
             formData.append('metode_bayar_id', selectedPayment.id);
