@@ -14,6 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../includes/csrf.php';
 
 // Hanya terima POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -24,6 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Pastikan response selalu JSON
 header('Content-Type: application/json; charset=utf-8');
+
+// ─── CSRF Verification ──────────────────────────────────────────
+if (!csrf_verify()) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Permintaan tidak valid. Silakan muat ulang halaman dan coba lagi.']);
+    exit;
+}
 
 // ─── Cek koneksi DB ───────────────────────────────────────────────
 if (!$db_connected || !$pdo) {
