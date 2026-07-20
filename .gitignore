@@ -5,15 +5,6 @@ config/db.php
 .env
 .env.local
 
-# Asset Images (private/generated)
-assets/images/*.png
-assets/images/*.jpg
-assets/images/*.jpeg
-assets/images/*.gif
-assets/images/*.svg
-assets/images/*.webp
-assets/images/*.ico
-
 # IDEs & System Files
 .vscode/
 .idea/
