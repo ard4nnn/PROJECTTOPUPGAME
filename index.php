@@ -22,10 +22,28 @@ if (!$db_connected) {
     $games_load_failed = true;
 }
 
-$flash_sale_end = $flashsale_data['end_time'];
-$flash_sale_title = $flashsale_data['title'];
-$flash_sale_subtitle = $flashsale_data['subtitle'];
-$flash_sale_items = $flashsale_data['items'];
+// Dynamic flash sale from database
+$flash_sale_active = false;
+$flash_sale_end = '';
+$flash_sale_title = '';
+$flash_sale_subtitle = '';
+$flash_sale_items = $flashsale_data['items'] ?? [];
+
+if ($db_connected && $pdo) {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM flash_sale WHERE status = 'aktif' AND end_time > NOW() ORDER BY end_time ASC LIMIT 1");
+        $stmt->execute();
+        $fs_db = $stmt->fetch();
+        if ($fs_db) {
+            $flash_sale_active = true;
+            $flash_sale_end = $fs_db['end_time'];
+            $flash_sale_title = $fs_db['judul'];
+            $flash_sale_subtitle = $fs_db['deskripsi'];
+        }
+    } catch (PDOException $e) {
+        // fail silently
+    }
+}
 ?>
 
 <input type="hidden" id="search-input">
@@ -97,6 +115,7 @@ $flash_sale_items = $flashsale_data['items'];
     </div>
 </div>
 
+<?php if ($flash_sale_active): ?>
 <div class="flash-sale-section">
     <div class="flash-sale-header">
         <div class="flash-sale-title-container">
@@ -248,6 +267,7 @@ $flash_sale_items = $flashsale_data['items'];
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <div class="container">
     <div class="section-header">
