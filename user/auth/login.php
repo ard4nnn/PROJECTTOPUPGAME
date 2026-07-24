@@ -7,7 +7,7 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-$error = '';
+$error = isset($_GET['error']) ? trim($_GET['error']) : '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -240,13 +240,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <!-- Google Button -->
-    <button
-      type="button"
+    <a
+      href="<?php echo $base_url; ?>user/auth/google-login.php"
       class="w-full h-10 rounded-lg border border-zinc-700 bg-zinc-950 text-zinc-50 hover:bg-zinc-800 hover:border-yellow-400/40 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
     >
       <img src="<?php echo $base_url; ?>assets/images/google.png" alt="Google" class="h-4 w-4 object-contain" />
       Masuk dengan Google
-    </button>
+    </a>
 
     <div class="flex items-center justify-center text-sm text-zinc-400 pt-6">
       Butuh bantuan?&nbsp;

@@ -1,0 +1,9 @@
+<?php
+// Konfigurasi Google OAuth 2.0
+// Dapatkan Client ID dan Client Secret dari Google Cloud Console:
+// https://console.cloud.google.com/
+// Pastikan Authorized Redirect URI didaftarkan sebagai:
+// http://localhost/PROJECTTOPUPGAME/user/auth/google-callback.php
+
+define('GOOGLE_CLIENT_ID', 'ISI_CLIENT_ID_DARI_GOOGLE_CLOUD_CONSOLE');
+define('GOOGLE_CLIENT_SECRET', 'ISI_CLIENT_SECRET_DARI_GOOGLE_CLOUD_CONSOLE');
