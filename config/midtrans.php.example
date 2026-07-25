@@ -1,0 +1,13 @@
+<?php
+/**
+ * Template Konfigurasi Midtrans Payment Gateway
+ * 
+ * Salin file ini menjadi `config/midtrans.php` dan isi kredensial Sandbox/Production Anda.
+ */
+
+// Server Key & Client Key dari Dashboard Midtrans (Settings -> Access Keys)
+define('MIDTRANS_SERVER_KEY', 'SB-Mid-server-YOUR_SERVER_KEY_HERE');
+define('MIDTRANS_CLIENT_KEY', 'SB-Mid-client-YOUR_CLIENT_KEY_HERE');
+
+// Set true jika menggunakan akun Midtrans Production, false untuk Sandbox
+define('MIDTRANS_IS_PRODUCTION', false);
