@@ -799,6 +799,22 @@ if (!$db_connected || !$game) {
     </div>
 </div>
 
+<?php
+$midtrans_client_key = '';
+$snap_sdk_url = 'https://app.sandbox.midtrans.com/snap/snap.js';
+if (file_exists(__DIR__ . '/../../config/midtrans.php')) {
+    require_once __DIR__ . '/../../config/midtrans.php';
+    if (defined('MIDTRANS_CLIENT_KEY')) {
+        $midtrans_client_key = MIDTRANS_CLIENT_KEY;
+    }
+    if (defined('MIDTRANS_IS_PRODUCTION') && MIDTRANS_IS_PRODUCTION) {
+        $snap_sdk_url = 'https://app.midtrans.com/snap/snap.js';
+    }
+}
+?>
+<?php if (!empty($midtrans_client_key)): ?>
+<script src="<?php echo $snap_sdk_url; ?>" data-client-key="<?php echo htmlspecialchars($midtrans_client_key); ?>"></script>
+<?php endif; ?>
 <script>
     // Inject PHP variables into JS scope for topup.js
     window._topupConfig = {
