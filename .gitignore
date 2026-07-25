@@ -1,6 +1,7 @@
 # Database Configuration (private credentials)
 config/db.php
 config/google-oauth.php
+config/midtrans.php
 
 # Environment variables
 .env
