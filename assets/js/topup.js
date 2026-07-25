@@ -277,17 +277,48 @@ if (btnSubmit) {
                 btnSubmit.textContent = window.currentLang === 'id' ? 'Konfirmasi & Beli Sekarang' : 'Confirm & Buy Now';
 
                 if (data.success) {
-                    // Checkout sukses ke DB
-                    modalGame.textContent    = document.getElementById('summary-game').textContent;
-                    modalId.textContent      = idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : '-');
-                    modalProduct.textContent = productLabel;
-                    modalPayment.textContent = selectedPayment.name;
-                    modalTotal.textContent   = formatRupiah(data.nominal_transfer || totalPrice);
-                    
-                    if (modalInvoice) {
-                        modalInvoice.textContent = '#' + data.invoice_id;
+                    // Function helper untuk menampilkan modal receipt invoice
+                    var showInvoiceModal = function() {
+                        var summaryGameElem = document.getElementById('summary-game');
+                        modalGame.textContent    = summaryGameElem ? summaryGameElem.textContent : '-';
+                        modalId.textContent      = idInput ? idInput.value.trim() : (visibleId ? visibleId.value.trim() : '-');
+                        modalProduct.textContent = productLabel;
+                        modalPayment.textContent = selectedPayment.name;
+                        modalTotal.textContent   = formatRupiah(data.nominal_transfer || totalPrice);
+                        
+                        if (modalInvoice) {
+                            modalInvoice.textContent = '#' + data.invoice_id;
+                        }
+                        checkoutModal.style.display = 'flex';
+                    };
+
+                    // Jika ada snap_token dan SDK Snap.js dimuat
+                    if (data.snap_token && typeof window.snap !== 'undefined') {
+                        window.snap.pay(data.snap_token, {
+                            onSuccess: function(result) {
+                                showToast(window.currentLang === 'id' ? 'Pembayaran dikirim! Menunggu konfirmasi webhook.' : 'Payment submitted! Awaiting webhook confirmation.', 'success');
+                                showInvoiceModal();
+                            },
+                            onPending: function(result) {
+                                showToast(window.currentLang === 'id' ? 'Transaksi pending. Silakan selesaikan pembayaran.' : 'Transaction pending. Please complete your payment.', 'warning');
+                                showInvoiceModal();
+                            },
+                            onError: function(result) {
+                                showToast(window.currentLang === 'id' ? 'Pembayaran gagal/dibatalkan. Transaksi tersimpan sebagai Pending.' : 'Payment failed. Transaction recorded as Pending.', 'error');
+                                showInvoiceModal();
+                            },
+                            onClose: function() {
+                                showToast(window.currentLang === 'id' ? 'Popup ditutup. Transaksi masih pending, bisa dicek di menu Cek Transaksi.' : 'Payment window closed. Transaction is still pending.', 'warning');
+                                showInvoiceModal();
+                            }
+                        });
+                    } else {
+                        // Jika snap_token tidak ada (misal kredensial belum diisi) atau snap.js tidak dimuat
+                        if (data.midtrans_error) {
+                            showToast(data.midtrans_error, 'warning');
+                        }
+                        showInvoiceModal();
                     }
-                    checkoutModal.style.display = 'flex';
                 } else {
                     showToast(data.message || 'Gagal memproses transaksi.', 'error');
                 }
