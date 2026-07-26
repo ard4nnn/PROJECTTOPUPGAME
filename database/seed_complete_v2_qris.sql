@@ -227,6 +227,12 @@ INSERT INTO produk (game_id, nama_produk, jumlah, harga, status) VALUES
 (4, '6480 + 1600 Lunites',         '8080', 1484052, 'aktif');
 
 -- ────────────────────────────────────────────────────────────
+-- ADMIN USER: Jadikan user 'ardannn' sebagai admin
+-- Jalankan ini setelah user 'ardannn' sudah terdaftar lewat Google OAuth / register
+-- ────────────────────────────────────────────────────────────
+UPDATE users SET is_admin = 1 WHERE username = 'ardannn';
+
+-- ────────────────────────────────────────────────────────────
 -- SELESAI! Verifikasi:
 -- ────────────────────────────────────────────────────────────
 SELECT '=== SEED COMPLETE ===' AS info;
